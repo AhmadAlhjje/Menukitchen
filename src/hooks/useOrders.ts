@@ -28,7 +28,13 @@ export const useOrders = () => {
       });
 
       // Handle different response structures
-      const orders: Order[] = response.data.orders || response.data.data || response.data || [];
+      let orders: Order[] = response.data.orders || response.data.data || response.data || [];
+
+      // Normalize orders to ensure items array is set correctly
+      orders = orders.map(order => ({
+        ...order,
+        items: order.items || order.orderItems || []
+      }));
 
       dispatch(setNewOrders(orders));
       dispatch(setError(null));
@@ -50,7 +56,13 @@ export const useOrders = () => {
         params: { status: 'ready' },
       });
 
-      const orders: Order[] = response.data.orders || response.data.data || response.data || [];
+      let orders: Order[] = response.data.orders || response.data.data || response.data || [];
+
+      // Normalize orders to ensure items array is set correctly
+      orders = orders.map(order => ({
+        ...order,
+        items: order.items || order.orderItems || []
+      }));
 
       dispatch(setReadyOrders(orders));
       dispatch(setError(null));
@@ -95,7 +107,17 @@ export const useOrders = () => {
     async (orderId: number): Promise<Order | null> => {
       try {
         const response = await axiosInstance.get(`/api/orders/${orderId}`);
-        return response.data.order || response.data.data || response.data;
+        const order = response.data.order || response.data.data || response.data;
+
+        // Normalize order to ensure items array is set correctly
+        if (order) {
+          return {
+            ...order,
+            items: order.items || order.orderItems || []
+          };
+        }
+
+        return order;
       } catch (err: any) {
         const errorMessage = err.response?.data?.message || 'فشل تحميل تفاصيل الطلب';
         toast.error(errorMessage);

@@ -17,23 +17,47 @@ export const OrderItemRow: React.FC<OrderItemRowProps> = ({ item, showNotes = tr
     ? (item.item?.nameAr || item.item?.name || '-')
     : (item.item?.name || '-');
 
+  // Convert unitPrice and subtotal from string to number if needed
+  const unitPrice = typeof item.unitPrice === 'string' ? parseFloat(item.unitPrice) : (item.unitPrice || item.price || 0);
+  const subtotal = typeof item.subtotal === 'string' ? parseFloat(item.subtotal) : (item.subtotal || (item.quantity * unitPrice));
+
   return (
-    <div className="border-b border-gray-200 py-3 last:border-0">
-      <div className="flex justify-between items-start">
+    <div className="border border-gray-200 rounded-lg p-4 mb-3 bg-white hover:shadow-md transition-shadow">
+      <div className="flex justify-between items-start mb-3">
         <div className="flex-1">
-          <h4 className="font-medium text-text">{itemName}</h4>
+          <h4 className="font-bold text-lg text-text mb-1">{itemName}</h4>
           {showNotes && item.notes && (
-            <p className="text-sm text-gray-500 mt-1">
-              <span className="font-medium">{t('common.notes')}:</span> {item.notes}
-            </p>
+            <div className="mt-2 p-2 bg-amber-50 border border-amber-200 rounded">
+              <p className="text-sm text-amber-800">
+                <span className="font-semibold">{t('common.notes')}:</span> {item.notes}
+              </p>
+            </div>
           )}
         </div>
-        <div className="text-right ms-4">
-          <p className="text-sm text-gray-600">
-            {item.quantity} × {formatCurrency(item.price, language === 'ar' ? 'ar-SA' : 'en-US')}
-          </p>
-          <p className="font-bold text-text">
-            {formatCurrency(item.quantity * item.price, language === 'ar' ? 'ar-SA' : 'en-US')}
+      </div>
+
+      <div className="flex justify-between items-center pt-3 border-t border-gray-100">
+        <div className="flex items-center gap-6">
+          {/* Quantity */}
+          <div className="text-center">
+            <p className="text-xs text-gray-500 mb-1">{language === 'ar' ? 'الكمية' : 'Quantity'}</p>
+            <p className="text-2xl font-bold text-primary">{item.quantity}</p>
+          </div>
+
+          {/* Unit Price */}
+          <div className="text-center">
+            <p className="text-xs text-gray-500 mb-1">{language === 'ar' ? 'سعر الوحدة' : 'Unit Price'}</p>
+            <p className="text-lg font-semibold text-gray-700">
+              {formatCurrency(unitPrice, language === 'ar' ? 'ar-SA' : 'en-US')}
+            </p>
+          </div>
+        </div>
+
+        {/* Subtotal */}
+        <div className="text-right">
+          <p className="text-xs text-gray-500 mb-1">{language === 'ar' ? 'المجموع' : 'Subtotal'}</p>
+          <p className="text-2xl font-bold text-primary">
+            {formatCurrency(subtotal, language === 'ar' ? 'ar-SA' : 'en-US')}
           </p>
         </div>
       </div>

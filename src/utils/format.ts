@@ -27,10 +27,15 @@ export const formatDate = (date: string | Date, locale: string = 'ar-SA'): strin
  */
 export const formatTime = (date: string | Date, locale: string = 'ar-SA'): string => {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
-  return new Intl.DateTimeFormat(locale, {
+
+  // Use Gregorian calendar for Arabic locale to avoid Hijri dates
+  const effectiveLocale = locale === 'ar-SA' ? 'ar-EG' : locale;
+
+  return new Intl.DateTimeFormat(effectiveLocale, {
     hour: '2-digit',
     minute: '2-digit',
     hour12: true,
+    calendar: 'gregory',
   }).format(dateObj);
 };
 
@@ -39,13 +44,52 @@ export const formatTime = (date: string | Date, locale: string = 'ar-SA'): strin
  */
 export const formatDateTime = (date: string | Date, locale: string = 'ar-SA'): string => {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
-  return new Intl.DateTimeFormat(locale, {
+
+  // Use Gregorian calendar for Arabic locale to avoid Hijri dates
+  const effectiveLocale = locale === 'ar-SA' ? 'ar-EG' : locale;
+
+  return new Intl.DateTimeFormat(effectiveLocale, {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
     hour12: true,
+    calendar: 'gregory',
+  }).format(dateObj);
+};
+
+/**
+ * Format order time in a clear and beautiful format
+ */
+export const formatOrderTime = (date: string | Date, locale: string = 'ar'): string => {
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  const now = new Date();
+  const diffInHours = Math.floor((now.getTime() - dateObj.getTime()) / (1000 * 60 * 60));
+
+  // If the order is from today, show relative time
+  if (diffInHours < 24 && dateObj.getDate() === now.getDate()) {
+    const effectiveLocale = locale === 'ar' ? 'ar-EG' : 'en-US';
+    const timeStr = new Intl.DateTimeFormat(effectiveLocale, {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+      calendar: 'gregory',
+    }).format(dateObj);
+
+    return locale === 'ar' ? `اليوم ${timeStr}` : `Today ${timeStr}`;
+  }
+
+  // Otherwise show full date and time
+  const effectiveLocale = locale === 'ar' ? 'ar-EG' : 'en-US';
+  return new Intl.DateTimeFormat(effectiveLocale, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+    calendar: 'gregory',
   }).format(dateObj);
 };
 

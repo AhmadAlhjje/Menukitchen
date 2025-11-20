@@ -6,7 +6,7 @@ import { Order } from '@/types';
 import { Card } from '../atoms/Card';
 import { Badge } from '../atoms/Badge';
 import { Button } from '../atoms/Button';
-import { formatCurrency, formatTime, getRelativeTime } from '@/utils/format';
+import { formatCurrency, formatOrderTime, getRelativeTime } from '@/utils/format';
 import { useTranslation } from '@/hooks/useTranslation';
 
 interface OrderCardProps {
@@ -44,12 +44,12 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onMarkAsReady, load
         <div className="flex justify-between text-sm">
           <span className="text-gray-600">{t('orders.tableNumber')}:</span>
           <span className="font-medium">
-            {order.session?.table?.tableNumber || t('common.table') + ' #' + order.session?.tableId}
+            {order.table?.tableNumber || order.session?.table?.tableNumber || t('common.table') + ' #' + (order.tableId || order.session?.tableId)}
           </span>
         </div>
         <div className="flex justify-between text-sm">
           <span className="text-gray-600">{t('orders.orderTime')}:</span>
-          <span className="font-medium">{formatTime(order.createdAt, language === 'ar' ? 'ar-SA' : 'en-US')}</span>
+          <span className="font-medium">{formatOrderTime(order.orderTime || order.createdAt, language)}</span>
         </div>
         <div className="flex justify-between text-sm">
           <span className="text-gray-600">{t('orders.itemsCount')}:</span>

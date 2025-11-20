@@ -117,7 +117,7 @@ export default function OrderDetailsPage() {
             <div>
               <p className="text-sm text-gray-600">{t('orders.tableNumber')}</p>
               <p className="font-medium text-text">
-                {order.session?.table?.tableNumber || `${t('common.table')} #${order.session?.tableId}`}
+                {order.table?.tableNumber || order.session?.table?.tableNumber || `${t('common.table')} #${order.tableId || order.session?.tableId}`}
               </p>
             </div>
             <div>
@@ -127,7 +127,7 @@ export default function OrderDetailsPage() {
             <div>
               <p className="text-sm text-gray-600">{t('orders.orderTime')}</p>
               <p className="font-medium text-text">
-                {formatDateTime(order.createdAt, language === 'ar' ? 'ar-SA' : 'en-US')}
+                {formatDateTime(order.orderTime || order.createdAt, 'en-US')}
               </p>
             </div>
             <div>
@@ -151,7 +151,7 @@ export default function OrderDetailsPage() {
           <h2 className="text-xl font-bold text-text mb-4">
             {t('orders.orderDetails')}
           </h2>
-          <div className="space-y-2">
+          <div>
             {order.items?.map((item) => (
               <OrderItemRow key={item.id} item={item} showNotes />
             ))}

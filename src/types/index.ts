@@ -42,21 +42,30 @@ export interface OrderItem {
   orderId: number;
   itemId: number;
   quantity: number;
-  price: number;
+  price?: number;
+  unitPrice: string | number;
+  subtotal: string | number;
   notes?: string;
+  createdAt?: string;
+  updatedAt?: string;
   item?: MenuItem;
 }
 
 export interface Order {
   id: number;
   sessionId: number;
+  tableId: number;
+  orderNumber: string;
+  orderTime: string;
   status: OrderStatus;
   totalAmount: number;
   notes?: string;
   createdAt: string;
   updatedAt: string;
   items: OrderItem[];
+  orderItems?: OrderItem[];
   session?: Session;
+  table?: Table;
 }
 
 // Session Types
