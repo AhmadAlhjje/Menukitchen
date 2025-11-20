@@ -4,7 +4,8 @@ import { useEffect, useCallback } from 'react';
 import { useAppDispatch, useAppSelector } from '@/lib/redux/hooks';
 import {
   setNewOrders,
-  setReadyOrders,
+  setPreparingOrders,
+  setDeliveredOrders,
   setLoading,
   setError,
   updateOrderStatus,
@@ -15,7 +16,7 @@ import toast from 'react-hot-toast';
 
 export const useOrders = () => {
   const dispatch = useAppDispatch();
-  const { newOrders, readyOrders, loading, error } = useAppSelector((state) => state.orders);
+  const { newOrders, preparingOrders, deliveredOrders, loading, error } = useAppSelector((state) => state.orders);
 
   // Fetch new orders
   const fetchNewOrders = useCallback(async () => {
@@ -47,13 +48,13 @@ export const useOrders = () => {
     }
   }, [dispatch]);
 
-  // Fetch ready orders
-  const fetchReadyOrders = useCallback(async () => {
+  // Fetch preparing orders
+  const fetchPreparingOrders = useCallback(async () => {
     try {
       dispatch(setLoading(true));
 
       const response = await axiosInstance.get('/api/orders', {
-        params: { status: 'ready' },
+        params: { status: 'preparing' },
       });
 
       let orders: Order[] = response.data.orders || response.data.data || response.data || [];
@@ -64,38 +65,88 @@ export const useOrders = () => {
         items: order.items || order.orderItems || []
       }));
 
-      dispatch(setReadyOrders(orders));
+      dispatch(setPreparingOrders(orders));
       dispatch(setError(null));
     } catch (err: any) {
-      const errorMessage = err.response?.data?.message || 'فشل تحميل الطلبات الجاهزة';
+      const errorMessage = err.response?.data?.message || 'فشل تحميل الطلبات قيد الإعداد';
       dispatch(setError(errorMessage));
-      console.error('Error fetching ready orders:', err);
+      console.error('Error fetching preparing orders:', err);
     } finally {
       dispatch(setLoading(false));
     }
   }, [dispatch]);
 
-  // Fetch all orders (new and ready)
-  const fetchAllOrders = useCallback(async () => {
-    await Promise.all([fetchNewOrders(), fetchReadyOrders()]);
-  }, [fetchNewOrders, fetchReadyOrders]);
+  // Fetch delivered orders
+  const fetchDeliveredOrders = useCallback(async () => {
+    try {
+      dispatch(setLoading(true));
 
-  // Mark order as ready
-  const markOrderAsReady = useCallback(
+      const response = await axiosInstance.get('/api/orders', {
+        params: { status: 'delivered' },
+      });
+
+      let orders: Order[] = response.data.orders || response.data.data || response.data || [];
+
+      // Normalize orders to ensure items array is set correctly
+      orders = orders.map(order => ({
+        ...order,
+        items: order.items || order.orderItems || []
+      }));
+
+      dispatch(setDeliveredOrders(orders));
+      dispatch(setError(null));
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || 'فشل تحميل الطلبات المُسلمة';
+      dispatch(setError(errorMessage));
+      console.error('Error fetching delivered orders:', err);
+    } finally {
+      dispatch(setLoading(false));
+    }
+  }, [dispatch]);
+
+  // Fetch all orders (new, preparing, and delivered)
+  const fetchAllOrders = useCallback(async () => {
+    await Promise.all([fetchNewOrders(), fetchPreparingOrders(), fetchDeliveredOrders()]);
+  }, [fetchNewOrders, fetchPreparingOrders, fetchDeliveredOrders]);
+
+  // Mark order as preparing
+  const markOrderAsPreparation = useCallback(
     async (orderId: number) => {
       try {
         await axiosInstance.patch(`/api/orders/${orderId}/status`, {
-          status: 'ready',
+          status: 'preparing',
         });
 
-        dispatch(updateOrderStatus({ orderId, status: 'ready' }));
-        toast.success('تم تحديد الطلب كجاهز');
+        dispatch(updateOrderStatus({ orderId, status: 'preparing' }));
+        toast.success('تم تحديد الطلب كقيد الإعداد');
 
         return true;
       } catch (err: any) {
-        const errorMessage = err.response?.data?.message || 'فشل تحديد الطلب كجاهز';
+        const errorMessage = err.response?.data?.message || 'فشل تحديد الطلب كقيد الإعداد';
         toast.error(errorMessage);
-        console.error('Error marking order as ready:', err);
+        console.error('Error marking order as preparing:', err);
+        return false;
+      }
+    },
+    [dispatch]
+  );
+
+  // Mark order as delivered
+  const markOrderAsDelivered = useCallback(
+    async (orderId: number) => {
+      try {
+        await axiosInstance.patch(`/api/orders/${orderId}/status`, {
+          status: 'delivered',
+        });
+
+        dispatch(updateOrderStatus({ orderId, status: 'delivered' }));
+        toast.success('تم تحديد الطلب كمُسلّم');
+
+        return true;
+      } catch (err: any) {
+        const errorMessage = err.response?.data?.message || 'فشل تحديد الطلب كمُسلّم';
+        toast.error(errorMessage);
+        console.error('Error marking order as delivered:', err);
         return false;
       }
     },
@@ -141,13 +192,16 @@ export const useOrders = () => {
 
   return {
     newOrders,
-    readyOrders,
+    preparingOrders,
+    deliveredOrders,
     loading,
     error,
     fetchNewOrders,
-    fetchReadyOrders,
+    fetchPreparingOrders,
+    fetchDeliveredOrders,
     fetchAllOrders,
-    markOrderAsReady,
+    markOrderAsPreparation,
+    markOrderAsDelivered,
     getOrderById,
   };
 };

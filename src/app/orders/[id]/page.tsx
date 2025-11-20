@@ -19,7 +19,7 @@ export default function OrderDetailsPage() {
   const params = useParams();
   const { t, language } = useTranslation();
   const { isAuthenticated, isInitialized } = useAuth();
-  const { getOrderById, markOrderAsReady } = useOrders();
+  const { getOrderById, markOrderAsDelivered } = useOrders();
 
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
@@ -47,13 +47,13 @@ export default function OrderDetailsPage() {
     setLoading(false);
   };
 
-  const handleMarkAsReady = async () => {
+  const handleMarkAsDelivered = async () => {
     if (!orderId) return;
 
     setActionLoading(true);
-    const success = await markOrderAsReady(orderId);
+    const success = await markOrderAsDelivered(orderId);
     if (success && order) {
-      setOrder({ ...order, status: 'ready' });
+      setOrder({ ...order, status: 'delivered' });
     }
     setActionLoading(false);
   };
@@ -164,16 +164,16 @@ export default function OrderDetailsPage() {
             <Button
               variant="success"
               size="lg"
-              onClick={handleMarkAsReady}
+              onClick={handleMarkAsDelivered}
               loading={actionLoading}
               fullWidth
             >
-              {t('orders.markAsReady')}
+              تحديد كمُسلّم
             </Button>
           </div>
         )}
 
-        {order.status === 'ready' && (
+        {order.status === 'delivered' && (
           <Button
             variant="primary"
             size="lg"

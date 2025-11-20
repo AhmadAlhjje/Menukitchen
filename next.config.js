@@ -4,6 +4,10 @@ const nextConfig = {
   images: {
     domains: ['via.placeholder.com'],
   },
+  // Increase timeout for font fetching to avoid AbortError
+  httpAgentOptions: {
+    keepAlive: true,
+  },
 }
 
 module.exports = nextConfig

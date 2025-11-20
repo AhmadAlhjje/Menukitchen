@@ -16,13 +16,13 @@ export default function OrdersPage() {
   const { isAuthenticated, isInitialized } = useAuth();
   const {
     newOrders,
-    readyOrders,
+    deliveredOrders,
     loading,
     fetchAllOrders,
-    markOrderAsReady,
+    markOrderAsDelivered,
   } = useOrders();
 
-  const [activeTab, setActiveTab] = useState<'new' | 'ready'>('new');
+  const [activeTab, setActiveTab] = useState<'new' | 'delivered'>('new');
 
   useEffect(() => {
     if (isInitialized && !isAuthenticated) {
@@ -39,14 +39,6 @@ export default function OrdersPage() {
       <Header />
 
       <main className="container mx-auto px-4 py-8">
-        {/* Page Header */}
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-text">{t('orders.title')}</h1>
-          <Button variant="primary" onClick={fetchAllOrders} disabled={loading}>
-            {t('orders.refreshOrders')}
-          </Button>
-        </div>
-
         {/* Tabs */}
         <div className="flex gap-2 mb-6 border-b border-gray-200">
           <button
@@ -60,14 +52,14 @@ export default function OrdersPage() {
             {t('orders.newOrders')} ({newOrders.length})
           </button>
           <button
-            onClick={() => setActiveTab('ready')}
+            onClick={() => setActiveTab('delivered')}
             className={`px-6 py-3 font-medium transition-colors border-b-2 ${
-              activeTab === 'ready'
+              activeTab === 'delivered'
                 ? 'border-success text-success'
                 : 'border-transparent text-gray-600 hover:text-text'
             }`}
           >
-            {t('orders.readyOrders')} ({readyOrders.length})
+            المُسلمة ({deliveredOrders.length})
           </button>
         </div>
 
@@ -78,13 +70,13 @@ export default function OrdersPage() {
               orders={newOrders}
               loading={loading}
               emptyMessage={t('orders.noNewOrders')}
-              onMarkAsReady={markOrderAsReady}
+              onMarkAsReady={markOrderAsDelivered}
             />
           ) : (
             <OrdersList
-              orders={readyOrders}
+              orders={deliveredOrders}
               loading={loading}
-              emptyMessage={t('orders.noReadyOrders')}
+              emptyMessage="لا توجد طلبات مُسلّمة"
             />
           )}
         </div>

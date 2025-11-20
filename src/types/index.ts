@@ -1,5 +1,5 @@
-// Order Status - Only two statuses are used in the system
-export type OrderStatus = 'new' | 'ready';
+// Order Status - Three statuses are used in the system
+export type OrderStatus = 'new' | 'preparing' | 'delivered';
 
 // User & Auth Types
 export interface User {
@@ -95,20 +95,10 @@ export interface Table {
 // Dashboard Statistics
 export interface DashboardStats {
   newOrdersCount: number;
-  readyOrdersCount: number;
+  preparingOrdersCount: number;
+  deliveredOrdersCount: number;
   activeSessionsCount: number;
   todayOrdersCount: number;
-}
-
-// Backend Note Types
-export interface BackendNote {
-  id: string;
-  title: string;
-  description: string;
-  endpoint: string;
-  type: 'bug' | 'missing' | 'enhancement';
-  severity: 'high' | 'medium' | 'low';
-  createdAt: string;
 }
 
 // API Response Types
