@@ -17,6 +17,9 @@ export const Header: React.FC = () => {
   const navItems = [
     { path: '/dashboard', label: t('navigation.dashboard'), icon: '📊' },
     { path: '/orders', label: t('navigation.orders'), icon: '📋' },
+    { path: '/sessions', label: 'الجلسات', icon: '🪑' },
+    { path: '/menu-items', label: 'عناصر القائمة', icon: '🍽️' },
+    { path: '/tables', label: 'الطاولات', icon: '🏪' },
   ];
 
   const isActive = (path: string) => pathname === path;

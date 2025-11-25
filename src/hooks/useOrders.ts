@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import { useAppDispatch, useAppSelector } from '@/lib/redux/hooks';
 import {
   setNewOrders,
@@ -17,6 +17,7 @@ import toast from 'react-hot-toast';
 export const useOrders = (autoFetch: boolean = true) => {
   const dispatch = useAppDispatch();
   const { newOrders, preparingOrders, deliveredOrders, loading, error } = useAppSelector((state) => state.orders);
+  const hasFetchedOnMount = useRef(false);
 
   // Fetch new orders
   const fetchNewOrders = useCallback(async () => {
@@ -203,18 +204,31 @@ export const useOrders = (autoFetch: boolean = true) => {
     }
 
     console.log('[useOrders] Initial fetch on mount');
-    fetchAllOrders();
+
+    // Fetch immediately
+    const doFetch = async () => {
+      try {
+        console.log('[useOrders] Starting fetchAllOrders...');
+        await Promise.all([fetchNewOrders(), fetchDeliveredOrders()]);
+        console.log('[useOrders] Completed fetchAllOrders successfully');
+      } catch (error) {
+        console.error('[useOrders] Error fetching all orders:', error);
+      }
+    };
+
+    doFetch();
 
     const interval = setInterval(() => {
       console.log('[useOrders] Auto-refresh interval triggered');
-      fetchAllOrders();
+      doFetch();
     }, 30000); // 30 seconds
 
     return () => {
       console.log('[useOrders] Cleanup: clearing interval');
       clearInterval(interval);
     };
-  }, [fetchAllOrders, autoFetch]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoFetch]); // Only depend on autoFetch, not on the fetch functions
 
   return {
     newOrders,

@@ -54,14 +54,6 @@ export default function OrdersPage() {
         <Header />
 
         <main className="container mx-auto px-4 py-8">
-          {/* Page Header */}
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-3xl font-bold text-text">{t('orders.title')}</h1>
-            <Button variant="primary" onClick={fetchAllOrders} disabled={loading} size="sm">
-              {loading ? '⏳' : '🔄'} {t('orders.refreshOrders')}
-            </Button>
-          </div>
-
           {/* Tabs */}
           <div className="flex gap-2 mb-6 border-b border-gray-200">
             <button

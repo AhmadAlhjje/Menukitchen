@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
 import {
@@ -11,6 +11,7 @@ import {
 import axiosInstance from "@/lib/axios";
 import { LoginRequest, User } from "@/types";
 import toast from "react-hot-toast";
+import { getCookie } from "@/utils/cookies";
 
 export const useAuth = () => {
   const router = useRouter();
@@ -19,30 +20,53 @@ export const useAuth = () => {
     (state) => state.auth
   );
   const [isInitialized, setIsInitialized] = useState(false);
+  const hasCheckedAuth = useRef(false);
 
-  // Check if user is already logged in on mount
+  // Check if user is already logged in on mount - ONLY ONCE
   useEffect(() => {
-    const checkAuth = async () => {
-      const token = localStorage.getItem("kitchen_token");
+    // Prevent running more than once
+    if (hasCheckedAuth.current) {
+      return;
+    }
+    
+    hasCheckedAuth.current = true;
 
-      if (token && !isAuthenticated) {
+    const checkAuth = async () => {
+      console.log('[useAuth] Checking authentication...');
+
+      // Check both localStorage and cookies for token
+      let token = localStorage.getItem("kitchen_token");
+      if (!token) {
+        token = getCookie("kitchen_token");
+        console.log('[useAuth] Token from cookie:', token ? 'found' : 'not found');
+      } else {
+        console.log('[useAuth] Token from localStorage:', token ? 'found' : 'not found');
+      }
+
+      if (token) {
         try {
+          console.log('[useAuth] Verifying token...');
           // Verify token and get user info
           const response = await axiosInstance.get("/api/auth/me");
           const userData: User = response.data.user || response.data;
 
+          console.log('[useAuth] Token valid, user:', userData.username);
           dispatch(setCredentials({ user: userData, token }));
         } catch (error) {
-          // Token is invalid, remove it
+          console.error('[useAuth] Token invalid:', error);
+          // Token is invalid, remove it from both places
           localStorage.removeItem("kitchen_token");
         }
+      } else {
+        console.log('[useAuth] No token found');
       }
 
+      console.log('[useAuth] Initialization complete');
       setIsInitialized(true);
     };
 
     checkAuth();
-  }, [dispatch, isAuthenticated]);
+  }, []); // Empty dependency array
 
   // Login function
   const login = async (credentials: LoginRequest) => {
@@ -54,9 +78,6 @@ export const useAuth = () => {
 
       dispatch(setCredentials({ user, token }));
       toast.success("تم تسجيل الدخول بنجاح");
-
-      // ❌ احذف هذه الأسطر
-      // router.push('/dashboard');
     } catch (error: any) {
       const errorMessage =
         error.response?.data?.message || "فشل تسجيل الدخول. تحقق من البيانات.";
@@ -70,10 +91,8 @@ export const useAuth = () => {
   // Logout function
   const logout = async () => {
     try {
-      // Call logout endpoint (optional, token is removed from localStorage anyway)
       await axiosInstance.post("/api/auth/logout");
     } catch (error) {
-      // Ignore errors, proceed with logout
       console.error("Logout error:", error);
     } finally {
       dispatch(logoutAction());

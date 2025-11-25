@@ -20,6 +20,13 @@ export interface LoginResponse {
   user: User;
 }
 
+// Category Types
+export interface Category {
+  id: number;
+  name: string;
+  nameAr: string;
+}
+
 // Menu Item Types
 export interface MenuItem {
   id: number;
@@ -27,13 +34,14 @@ export interface MenuItem {
   name: string;
   nameAr: string;
   description?: string;
-  price: number;
-  image?: string;
+  price: string | number;
+  images?: string; // JSON string of image array
   preparationTime: number;
   isAvailable: boolean;
   displayOrder: number;
   createdAt: string;
   updatedAt: string;
+  category?: Category;
 }
 
 // Order Types
@@ -71,25 +79,41 @@ export interface Order {
 // Session Types
 export interface Session {
   id: number;
+  restaurantId: number;
   tableId: number;
-  qrCode: string;
-  numberOfGuests: number;
-  status: 'active' | 'closed';
+  sessionNumber: string;
   startTime: string;
-  endTime?: string;
-  notes?: string;
+  endTime?: string | null;
+  status: 'active' | 'closed';
+  totalAmount: string | number;
+  numberOfGuests: number;
+  notes?: string | null;
+  closedBy?: number | null;
+  createdAt: string;
+  updatedAt: string;
   table?: Table;
+  orders?: Order[];
+  closedByUser?: {
+    id: number;
+    username: string;
+  } | null;
 }
 
 // Table Types
+export type TableStatus = 'available' | 'occupied' | 'reserved';
+
 export interface Table {
   id: number;
   restaurantId: number;
   tableNumber: string;
-  capacity: number;
   qrCode: string;
+  qrCodeImage?: string;
+  capacity: number;
+  status: TableStatus;
   location?: string;
   isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // Dashboard Statistics
