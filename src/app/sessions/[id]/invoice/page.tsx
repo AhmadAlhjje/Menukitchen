@@ -17,12 +17,12 @@ export default function InvoicePage() {
   const params = useParams();
   const { t, language } = useTranslation();
   const { isAuthenticated, isInitialized } = useAuth();
-  const { getSessionOrders } = useSessions();
+  const { getSessionById } = useSessions();
 
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const sessionId = params?.id ? parseInt(params.id as string) : null;
+  const sessionId = params?.id ? parseInt(params.id as string) : undefined;
 
   useEffect(() => {
     if (isInitialized && !isAuthenticated) {
@@ -39,9 +39,12 @@ export default function InvoicePage() {
     if (!sessionId) return;
 
     setLoading(true);
-    const ordersData = await getSessionOrders(sessionId);
-    setOrders(ordersData);
-    setLoading(false);
+    try {
+      const session = await getSessionById(sessionId);
+      setOrders(session?.orders || []);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const calculateTotal = () => {
@@ -71,7 +74,7 @@ export default function InvoicePage() {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="container mx-auto px-4 py-8 max-w-4xl">
+      <main className="container mx-auto px-4 py-8 max-w-4xl lg:pr-72">
         {/* Action Buttons */}
         <div className="flex justify-between items-center mb-6 print:hidden">
           <Button variant="outline" size="sm" onClick={() => router.back()}>
@@ -137,15 +140,16 @@ export default function InvoicePage() {
                           ? (item.item?.nameAr || item.item?.name || '-')
                           : (item.item?.name || '-');
 
+                        const price = item.price || 0;
                         return (
                           <tr key={item.id} className="border-b border-gray-200">
                             <td className="py-3">{itemName}</td>
                             <td className="text-center py-3">{item.quantity}</td>
                             <td className="text-end py-3">
-                              {formatCurrency(item.price, language === 'ar' ? 'ar-SA' : 'en-US')}
+                              {formatCurrency(price, language === 'ar' ? 'ar-SA' : 'en-US')}
                             </td>
                             <td className="text-end py-3">
-                              {formatCurrency(item.quantity * item.price, language === 'ar' ? 'ar-SA' : 'en-US')}
+                              {formatCurrency(item.quantity * price, language === 'ar' ? 'ar-SA' : 'en-US')}
                             </td>
                           </tr>
                         );

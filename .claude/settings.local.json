@@ -3,7 +3,12 @@
     "allow": [
       "Bash(dir:*)",
       "Bash(npm run dev:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run lint)",
+      "Bash(npx tsc:*)",
+      "Bash(timeout 30 npx tsc:*)",
+      "Bash(lsof:*)"
     ],
     "deny": [],
     "ask": []

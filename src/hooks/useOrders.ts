@@ -149,7 +149,7 @@ export const useOrders = (autoFetch: boolean = true) => {
 
   // Mark order as delivered
   const markOrderAsDelivered = useCallback(
-    async (orderId: number) => {
+    async (orderId: number): Promise<void> => {
       try {
         await axiosInstance.patch(`/api/orders/${orderId}/status`, {
           status: 'delivered',
@@ -157,13 +157,10 @@ export const useOrders = (autoFetch: boolean = true) => {
 
         dispatch(updateOrderStatus({ orderId, status: 'delivered' }));
         toast.success('تم تحديد الطلب كمُسلّم');
-
-        return true;
       } catch (err: any) {
         const errorMessage = err.response?.data?.message || 'فشل تحديد الطلب كمُسلّم';
         toast.error(errorMessage);
         console.error('Error marking order as delivered:', err);
-        return false;
       }
     },
     [dispatch]
@@ -195,7 +192,7 @@ export const useOrders = (autoFetch: boolean = true) => {
     []
   );
 
-  // Auto-refresh orders every 30 seconds
+  // Auto-refresh orders on mount only
   useEffect(() => {
     console.log('[useOrders] useEffect triggered. autoFetch:', autoFetch);
     if (!autoFetch) {
@@ -203,9 +200,15 @@ export const useOrders = (autoFetch: boolean = true) => {
       return;
     }
 
-    console.log('[useOrders] Initial fetch on mount');
+    if (hasFetchedOnMount.current) {
+      console.log('[useOrders] Already fetched on mount, skipping');
+      return;
+    }
 
-    // Fetch immediately
+    console.log('[useOrders] Initial fetch on mount');
+    hasFetchedOnMount.current = true;
+
+    // Fetch immediately on mount
     const doFetch = async () => {
       try {
         console.log('[useOrders] Starting fetchAllOrders...');
@@ -218,6 +221,7 @@ export const useOrders = (autoFetch: boolean = true) => {
 
     doFetch();
 
+    // Set up periodic refresh every 30 seconds
     const interval = setInterval(() => {
       console.log('[useOrders] Auto-refresh interval triggered');
       doFetch();

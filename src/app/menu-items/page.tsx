@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { Header } from '@/components/organisms/Header';
 import { Button } from '@/components/atoms/Button';
 import { Loader } from '@/components/atoms/Loader';
@@ -81,7 +82,7 @@ export default function MenuItemsPage() {
       <div className="min-h-screen bg-background">
         <Header />
 
-        <main className="container mx-auto px-4 py-8">
+        <main className="container mx-auto px-4 py-8 lg:pr-72">
           {/* Page Header */}
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-3xl font-bold text-text">إدارة عناصر القائمة</h1>
@@ -166,11 +167,15 @@ export default function MenuItemsPage() {
                   >
                     {/* Image */}
                     {firstImage ? (
-                      <img
-                        src={`${process.env.NEXT_PUBLIC_API_BASE_URL || ''}${firstImage}`}
-                        alt={itemName}
-                        className="w-full h-48 object-cover"
-                      />
+                      <div className="w-full h-48 relative">
+                        <Image
+                          src={`${process.env.NEXT_PUBLIC_API_BASE_URL || ''}${firstImage}`}
+                          alt={itemName}
+                          fill
+                          className="object-cover"
+                          priority={false}
+                        />
+                      </div>
                     ) : (
                       <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
                         <span className="text-4xl">🍽️</span>

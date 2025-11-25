@@ -15,7 +15,7 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ stats }) => {
   const { t } = useTranslation();
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
       <StatCard
         title={t('dashboard.newOrders')}
         value={stats.newOrdersCount}
@@ -35,7 +35,24 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ stats }) => {
 
       <StatCard
         title={t('dashboard.readyOrders')}
-        value={stats.readyOrdersCount}
+        value={stats.preparingOrdersCount}
+        color="secondary"
+        icon={
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+        }
+        onClick={() => router.push('/orders')}
+      />
+
+      <StatCard
+        title={t('dashboard.deliveredOrders')}
+        value={stats.deliveredOrdersCount}
         color="success"
         icon={
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

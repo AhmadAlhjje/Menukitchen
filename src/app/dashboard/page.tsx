@@ -28,7 +28,7 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8 lg:pr-72">
         {/* Quick Actions */}
         <div className="mt-8 bg-surface rounded-lg shadow-md p-6">
           <h2 className="text-xl font-bold text-text mb-4">

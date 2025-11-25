@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { Header } from '@/components/organisms/Header';
 import { Button } from '@/components/atoms/Button';
 import { Loader } from '@/components/atoms/Loader';
@@ -79,7 +80,7 @@ export default function TablesPage() {
       <div className="min-h-screen bg-background">
         <Header />
 
-        <main className="container mx-auto px-4 py-8">
+        <main className="container mx-auto px-4 py-8 lg:pr-72">
           {/* Page Header */}
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-3xl font-bold text-text">إدارة الطاولات</h1>
@@ -140,11 +141,15 @@ export default function TablesPage() {
                   {/* QR Code Image */}
                   {table.qrCodeImage && (
                     <div className="bg-gray-100 p-4 flex justify-center">
-                      <img
-                        src={`${process.env.NEXT_PUBLIC_API_BASE_URL || ''}${table.qrCodeImage}`}
-                        alt={`QR Code for Table ${table.tableNumber}`}
-                        className="w-32 h-32 object-contain"
-                      />
+                      <div className="relative w-32 h-32">
+                        <Image
+                          src={`${process.env.NEXT_PUBLIC_API_BASE_URL || ''}${table.qrCodeImage}`}
+                          alt={`QR Code for Table ${table.tableNumber}`}
+                          fill
+                          className="object-contain"
+                          priority={false}
+                        />
+                      </div>
                     </div>
                   )}
 

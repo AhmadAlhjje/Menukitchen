@@ -51,11 +51,14 @@ export default function OrderDetailsPage() {
     if (!orderId) return;
 
     setActionLoading(true);
-    const success = await markOrderAsDelivered(orderId);
-    if (success && order) {
-      setOrder({ ...order, status: 'delivered' });
+    try {
+      await markOrderAsDelivered(orderId);
+      if (order) {
+        setOrder({ ...order, status: 'delivered' });
+      }
+    } finally {
+      setActionLoading(false);
     }
-    setActionLoading(false);
   };
 
   if (!isInitialized || !isAuthenticated) {
@@ -86,7 +89,7 @@ export default function OrderDetailsPage() {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="container mx-auto px-4 py-8 max-w-4xl">
+      <main className="container mx-auto px-4 py-8 max-w-4xl lg:pr-72">
         {/* Back Button */}
         <Button
           variant="outline"

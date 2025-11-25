@@ -53,7 +53,7 @@ export default function OrdersPage() {
       <div className="min-h-screen bg-background">
         <Header />
 
-        <main className="container mx-auto px-4 py-8">
+        <main className="container mx-auto px-4 py-8 lg:pr-72">
           {/* Tabs */}
           <div className="flex gap-2 mb-6 border-b border-gray-200">
             <button
