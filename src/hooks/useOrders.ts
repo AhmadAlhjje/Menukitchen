@@ -14,19 +14,22 @@ import axiosInstance from '@/lib/axios';
 import { Order, OrderStatus } from '@/types';
 import toast from 'react-hot-toast';
 
-export const useOrders = () => {
+export const useOrders = (autoFetch: boolean = true) => {
   const dispatch = useAppDispatch();
   const { newOrders, preparingOrders, deliveredOrders, loading, error } = useAppSelector((state) => state.orders);
 
   // Fetch new orders
   const fetchNewOrders = useCallback(async () => {
     try {
+      console.log('[useOrders] Starting fetchNewOrders...');
       dispatch(setLoading(true));
 
       // Using the kitchen endpoint or general orders endpoint with status filter
       const response = await axiosInstance.get('/api/orders', {
         params: { status: 'new' },
       });
+
+      console.log('[useOrders] Received new orders response:', response.data);
 
       // Handle different response structures
       let orders: Order[] = response.data.orders || response.data.data || response.data || [];
@@ -37,12 +40,13 @@ export const useOrders = () => {
         items: order.items || order.orderItems || []
       }));
 
+      console.log('[useOrders] Normalized new orders:', orders.length, 'orders');
       dispatch(setNewOrders(orders));
       dispatch(setError(null));
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || 'فشل تحميل الطلبات الجديدة';
       dispatch(setError(errorMessage));
-      console.error('Error fetching new orders:', err);
+      console.error('[useOrders] Error fetching new orders:', err);
     } finally {
       dispatch(setLoading(false));
     }
@@ -79,11 +83,14 @@ export const useOrders = () => {
   // Fetch delivered orders
   const fetchDeliveredOrders = useCallback(async () => {
     try {
+      console.log('[useOrders] Starting fetchDeliveredOrders...');
       dispatch(setLoading(true));
 
       const response = await axiosInstance.get('/api/orders', {
         params: { status: 'delivered' },
       });
+
+      console.log('[useOrders] Received delivered orders response:', response.data);
 
       let orders: Order[] = response.data.orders || response.data.data || response.data || [];
 
@@ -93,21 +100,29 @@ export const useOrders = () => {
         items: order.items || order.orderItems || []
       }));
 
+      console.log('[useOrders] Normalized delivered orders:', orders.length, 'orders');
       dispatch(setDeliveredOrders(orders));
       dispatch(setError(null));
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || 'فشل تحميل الطلبات المُسلمة';
       dispatch(setError(errorMessage));
-      console.error('Error fetching delivered orders:', err);
+      console.error('[useOrders] Error fetching delivered orders:', err);
     } finally {
       dispatch(setLoading(false));
     }
   }, [dispatch]);
 
-  // Fetch all orders (new, preparing, and delivered)
+  // Fetch all orders (new and delivered only - no preparing in UI)
   const fetchAllOrders = useCallback(async () => {
-    await Promise.all([fetchNewOrders(), fetchPreparingOrders(), fetchDeliveredOrders()]);
-  }, [fetchNewOrders, fetchPreparingOrders, fetchDeliveredOrders]);
+    try {
+      console.log('[useOrders] Starting fetchAllOrders...');
+      await Promise.all([fetchNewOrders(), fetchDeliveredOrders()]);
+      console.log('[useOrders] Completed fetchAllOrders successfully');
+    } catch (error) {
+      console.error('[useOrders] Error fetching all orders:', error);
+      // Don't throw - let individual fetch functions handle errors
+    }
+  }, [fetchNewOrders, fetchDeliveredOrders]);
 
   // Mark order as preparing
   const markOrderAsPreparation = useCallback(
@@ -181,14 +196,25 @@ export const useOrders = () => {
 
   // Auto-refresh orders every 30 seconds
   useEffect(() => {
+    console.log('[useOrders] useEffect triggered. autoFetch:', autoFetch);
+    if (!autoFetch) {
+      console.log('[useOrders] autoFetch is false, skipping auto-fetch');
+      return;
+    }
+
+    console.log('[useOrders] Initial fetch on mount');
     fetchAllOrders();
 
     const interval = setInterval(() => {
+      console.log('[useOrders] Auto-refresh interval triggered');
       fetchAllOrders();
     }, 30000); // 30 seconds
 
-    return () => clearInterval(interval);
-  }, [fetchAllOrders]);
+    return () => {
+      console.log('[useOrders] Cleanup: clearing interval');
+      clearInterval(interval);
+    };
+  }, [fetchAllOrders, autoFetch]);
 
   return {
     newOrders,
