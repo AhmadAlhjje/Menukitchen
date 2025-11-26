@@ -28,7 +28,7 @@ export const useAuth = () => {
     if (hasCheckedAuth.current) {
       return;
     }
-    
+
     hasCheckedAuth.current = true;
 
     const checkAuth = async () => {
@@ -52,13 +52,18 @@ export const useAuth = () => {
 
           console.log('[useAuth] Token valid, user:', userData.username);
           dispatch(setCredentials({ user: userData, token }));
-        } catch (error) {
+        } catch (error: any) {
           console.error('[useAuth] Token invalid:', error);
           // Token is invalid, remove it from both places
           localStorage.removeItem("kitchen_token");
+
+          // Dispatch logout to clear Redux state
+          dispatch(logoutAction());
         }
       } else {
         console.log('[useAuth] No token found');
+        // Make sure Redux state is cleared
+        dispatch(logoutAction());
       }
 
       console.log('[useAuth] Initialization complete');
@@ -66,7 +71,8 @@ export const useAuth = () => {
     };
 
     checkAuth();
-  }, []); // Empty dependency array
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Login function
   const login = async (credentials: LoginRequest) => {

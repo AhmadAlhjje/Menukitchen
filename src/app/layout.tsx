@@ -1,13 +1,7 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
 import { Toaster } from 'react-hot-toast';
 import { ReduxProvider } from '@/lib/redux/provider';
 import './globals.css';
-
-const inter = Inter({
-  subsets: ['latin'],
-  fallback: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto'],
-});
 
 export const metadata: Metadata = {
   title: 'Kitchen System - نظام المطبخ',
@@ -21,7 +15,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ar" dir="rtl">
-      <body className={inter.className}>
+      <body>
         <ReduxProvider>
           {children}
           <Toaster

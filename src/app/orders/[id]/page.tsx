@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Header } from '@/components/organisms/Header';
 import { Card } from '@/components/atoms/Card';
@@ -27,6 +27,15 @@ export default function OrderDetailsPage() {
 
   const orderId = params?.id ? parseInt(params.id as string) : null;
 
+  const loadOrder = useCallback(async () => {
+    if (!orderId) return;
+
+    setLoading(true);
+    const orderData = await getOrderById(orderId);
+    setOrder(orderData);
+    setLoading(false);
+  }, [orderId, getOrderById]);
+
   useEffect(() => {
     if (isInitialized && !isAuthenticated) {
       router.push('/login');
@@ -36,16 +45,7 @@ export default function OrderDetailsPage() {
     if (orderId && isAuthenticated) {
       loadOrder();
     }
-  }, [orderId, isAuthenticated, isInitialized, router]);
-
-  const loadOrder = async () => {
-    if (!orderId) return;
-
-    setLoading(true);
-    const orderData = await getOrderById(orderId);
-    setOrder(orderData);
-    setLoading(false);
-  };
+  }, [orderId, isAuthenticated, isInitialized, router, loadOrder]);
 
   const handleMarkAsDelivered = async () => {
     if (!orderId) return;

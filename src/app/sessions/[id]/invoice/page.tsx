@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Header } from '@/components/organisms/Header';
 import { Button } from '@/components/atoms/Button';
@@ -24,18 +24,7 @@ export default function InvoicePage() {
 
   const sessionId = params?.id ? parseInt(params.id as string) : undefined;
 
-  useEffect(() => {
-    if (isInitialized && !isAuthenticated) {
-      router.push('/login');
-      return;
-    }
-
-    if (sessionId && isAuthenticated) {
-      loadSessionOrders();
-    }
-  }, [sessionId, isAuthenticated, isInitialized, router]);
-
-  const loadSessionOrders = async () => {
+  const loadSessionOrders = useCallback(async () => {
     if (!sessionId) return;
 
     setLoading(true);
@@ -45,7 +34,18 @@ export default function InvoicePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [sessionId, getSessionById]);
+
+  useEffect(() => {
+    if (isInitialized && !isAuthenticated) {
+      router.push('/login');
+      return;
+    }
+
+    if (sessionId && isAuthenticated) {
+      loadSessionOrders();
+    }
+  }, [sessionId, isAuthenticated, isInitialized, router, loadSessionOrders]);
 
   const calculateTotal = () => {
     return orders.reduce((sum, order) => sum + order.totalAmount, 0);

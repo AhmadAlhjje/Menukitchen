@@ -33,11 +33,10 @@ axiosInstance.interceptors.response.use(
     if (error.response) {
       // Handle 401 Unauthorized - Token expired or invalid
       if (error.response.status === 401) {
-        localStorage.removeItem('kitchen_token');
-
-        // Redirect to login if not already there
-        if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
-          window.location.href = '/login';
+        // Only clear token, don't redirect here
+        // Let the component handle the redirect to avoid infinite loops
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('kitchen_token');
         }
       }
     }
