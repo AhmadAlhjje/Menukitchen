@@ -150,10 +150,6 @@ export default function SessionsPage() {
                   >
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
                       <div>
-                        <p className="text-sm text-gray-600">رقم الجلسة</p>
-                        <p className="font-bold text-lg">{session.sessionNumber}</p>
-                      </div>
-                      <div>
                         <p className="text-sm text-gray-600">الطاولة</p>
                         <p className="font-bold text-lg">
                           {session.table?.tableNumber || '-'}

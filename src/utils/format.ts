@@ -15,10 +15,15 @@ export const formatCurrency = (amount: number, locale: string = 'ar-SA'): string
  */
 export const formatDate = (date: string | Date, locale: string = 'ar-SA'): string => {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
-  return new Intl.DateTimeFormat(locale, {
+
+  // Use Gregorian calendar for Arabic locale to avoid Hijri dates
+  const effectiveLocale = locale === 'ar-SA' ? 'ar-EG' : locale;
+
+  return new Intl.DateTimeFormat(effectiveLocale, {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
+    calendar: 'gregory',
   }).format(dateObj);
 };
 

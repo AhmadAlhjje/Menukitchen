@@ -71,10 +71,6 @@ export const Invoice: React.FC<InvoiceProps> = ({ session, onClose }) => {
           {/* Session Info */}
           <div className="grid grid-cols-2 gap-4 mb-6 text-sm">
             <div>
-              <p className="text-gray-600">رقم الجلسة / Session Number</p>
-              <p className="font-bold text-lg">{session.sessionNumber}</p>
-            </div>
-            <div>
               <p className="text-gray-600">رقم الطاولة / Table Number</p>
               <p className="font-bold text-lg">
                 {session.table?.tableNumber || '-'}

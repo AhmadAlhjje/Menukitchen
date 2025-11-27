@@ -68,8 +68,6 @@ export default function TablesPage() {
         return 'متاحة';
       case 'occupied':
         return 'مشغولة';
-      case 'reserved':
-        return 'محجوزة';
       default:
         return status;
     }
@@ -116,7 +114,6 @@ export default function TablesPage() {
                   <option value="all">الكل</option>
                   <option value="available">متاحة</option>
                   <option value="occupied">مشغولة</option>
-                  <option value="reserved">محجوزة</option>
                 </select>
               </div>
             </div>
@@ -234,7 +231,6 @@ export default function TablesPage() {
                 <p className="text-2xl font-bold text-warning">
                   {tables.filter(t => t.status === 'reserved').length}
                 </p>
-                <p className="text-sm text-gray-600">محجوزة</p>
               </div>
             </div>
           </div>

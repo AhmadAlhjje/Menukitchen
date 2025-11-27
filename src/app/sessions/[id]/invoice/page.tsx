@@ -20,7 +20,10 @@ export default function InvoicePage() {
   const { getSessionById } = useSessions();
 
   const [orders, setOrders] = useState<Order[]>([]);
+  const [sessionData, setSessionData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+
+  const locale = language === 'ar' ? 'ar-EG' : 'en-US';
 
   const sessionId = params?.id ? parseInt(params.id as string) : undefined;
 
@@ -30,6 +33,7 @@ export default function InvoicePage() {
     setLoading(true);
     try {
       const session = await getSessionById(sessionId);
+      setSessionData(session);
       setOrders(session?.orders || []);
     } finally {
       setLoading(false);
@@ -48,7 +52,7 @@ export default function InvoicePage() {
   }, [sessionId, isAuthenticated, isInitialized, router, loadSessionOrders]);
 
   const calculateTotal = () => {
-    return orders.reduce((sum, order) => sum + order.totalAmount, 0);
+    return orders.reduce((sum, order) => sum + (parseFloat(order.totalAmount as any) || 0), 0);
   };
 
   const handlePrint = () => {
@@ -93,10 +97,10 @@ export default function InvoicePage() {
               {t('invoice.title')}
             </h1>
             <p className="text-gray-600">
-              {t('invoice.sessionNumber')}: {sessionId}
+              {t('invoice.sessionNumber')}: {sessionData?.sessionNumber || sessionId}
             </p>
             <p className="text-sm text-gray-500">
-              {formatDate(new Date().toISOString(), language === 'ar' ? 'ar-SA' : 'en-US')} - {formatTime(new Date().toISOString(), language === 'ar' ? 'ar-SA' : 'en-US')}
+              {sessionData?.startTime && formatDate(sessionData.startTime, locale)} - {sessionData?.startTime && formatTime(sessionData.startTime, locale)}
             </p>
           </div>
 
@@ -134,27 +138,31 @@ export default function InvoicePage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {orders.map((order) =>
-                      order.items?.map((item) => {
+                    {orders.map((order) => {
+                      const orderItems = (order as any).orderItems || order.items || [];
+                      return orderItems.map((item: any) => {
                         const itemName = language === 'ar'
                           ? (item.item?.nameAr || item.item?.name || '-')
                           : (item.item?.name || '-');
 
-                        const price = item.price || 0;
+                        const price = parseFloat(item.unitPrice) || parseFloat(item.price) || 0;
+                        const quantity = item.quantity || 0;
+                        const subtotal = parseFloat(item.subtotal) || (price * quantity);
+
                         return (
                           <tr key={item.id} className="border-b border-gray-200">
                             <td className="py-3">{itemName}</td>
-                            <td className="text-center py-3">{item.quantity}</td>
+                            <td className="text-center py-3">{quantity}</td>
                             <td className="text-end py-3">
                               {formatCurrency(price, language === 'ar' ? 'ar-SA' : 'en-US')}
                             </td>
                             <td className="text-end py-3">
-                              {formatCurrency(item.quantity * price, language === 'ar' ? 'ar-SA' : 'en-US')}
+                              {formatCurrency(subtotal, language === 'ar' ? 'ar-SA' : 'en-US')}
                             </td>
                           </tr>
                         );
-                      })
-                    )}
+                      });
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -177,7 +185,7 @@ export default function InvoicePage() {
               {t('invoice.thankYou')}
             </p>
             <p className="text-sm text-gray-500">
-              {formatDate(new Date().toISOString(), language === 'ar' ? 'ar-SA' : 'en-US')}
+              {formatDate(new Date().toISOString(), locale)}
             </p>
           </div>
         </div>
