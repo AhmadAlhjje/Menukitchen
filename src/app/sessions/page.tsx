@@ -162,7 +162,7 @@ export default function SessionsPage() {
                       <div>
                         <p className="text-sm text-gray-600">المجموع</p>
                         <p className="font-bold text-lg text-primary">
-                          {totalAmount.toFixed(2)} ر.س
+                          {totalAmount.toFixed(2)} ل.س
                         </p>
                       </div>
                     </div>

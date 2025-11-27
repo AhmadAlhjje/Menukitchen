@@ -75,10 +75,12 @@ export default function InvoicePage() {
   const total = calculateTotal();
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
+    <div className="min-h-screen bg-background print:bg-white">
+      <div className="print:hidden">
+        <Header />
+      </div>
 
-      <main className="container mx-auto px-4 py-8 max-w-4xl lg:pr-72">
+      <main className="container mx-auto px-4 py-8 max-w-4xl lg:pr-72 print:p-0 print:m-0 print:max-w-full print:container-none">
         {/* Action Buttons */}
         <div className="flex justify-between items-center mb-6 print:hidden">
           <Button variant="outline" size="sm" onClick={() => router.back()}>
@@ -90,7 +92,7 @@ export default function InvoicePage() {
         </div>
 
         {/* Invoice Content */}
-        <div className="bg-surface rounded-lg shadow-lg p-8 print-content">
+        <div className="bg-surface rounded-lg shadow-lg p-8 print:shadow-none print:rounded-none">
           {/* Header */}
           <div className="text-center mb-8 border-b-2 border-primary pb-6">
             <h1 className="text-3xl font-bold text-primary mb-2">
