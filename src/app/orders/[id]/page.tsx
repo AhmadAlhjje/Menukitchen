@@ -105,7 +105,7 @@ export default function OrderDetailsPage() {
           <div className="flex justify-between items-start mb-4">
             <div>
               <h1 className="text-2xl font-bold text-text mb-2">
-                {t('orders.orderNumber')} #{order.id}
+                {t('orders.orderNumber')} {order.id}
               </h1>
               <p className="text-gray-600">
                 {getRelativeTime(order.createdAt, language)}
@@ -120,12 +120,8 @@ export default function OrderDetailsPage() {
             <div>
               <p className="text-sm text-gray-600">{t('orders.tableNumber')}</p>
               <p className="font-medium text-text">
-                {order.table?.tableNumber || order.session?.table?.tableNumber || `${t('common.table')} #${order.tableId || order.session?.tableId}`}
+                {order.table?.tableNumber || order.session?.table?.tableNumber || `${t('common.table')} ${order.tableId || order.session?.tableId}`}
               </p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">{t('orders.sessionId')}</p>
-              <p className="font-medium text-text">#{order.sessionId}</p>
             </div>
             <div>
               <p className="text-sm text-gray-600">{t('orders.orderTime')}</p>

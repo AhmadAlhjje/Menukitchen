@@ -54,24 +54,30 @@ export default function OrdersPage() {
         <Header />
 
         <main className="container mx-auto px-4 py-8 lg:pr-72">
+          {/* Page Header */}
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-text mb-2">إدارة الطلبات</h1>
+            <p className="text-text-light">تتبع وإدارة جميع طلبات المطبخ</p>
+          </div>
+
           {/* Tabs */}
-          <div className="flex gap-2 mb-6 border-b border-gray-200">
+          <div className="flex gap-3 mb-6 bg-surface rounded-xl p-2 shadow-sm border border-border">
             <button
               onClick={() => setActiveTab('new')}
-              className={`px-6 py-3 font-medium transition-colors border-b-2 ${
+              className={`flex-1 px-6 py-3 font-semibold rounded-lg transition-all duration-300 ${
                 activeTab === 'new'
-                  ? 'border-accent text-accent'
-                  : 'border-transparent text-gray-600 hover:text-text'
+                  ? 'bg-accent text-white shadow-md'
+                  : 'text-text-light hover:bg-primary-50'
               }`}
             >
               {t('orders.newOrders')} ({newOrders.length})
             </button>
             <button
               onClick={() => setActiveTab('delivered')}
-              className={`px-6 py-3 font-medium transition-colors border-b-2 ${
+              className={`flex-1 px-6 py-3 font-semibold rounded-lg transition-all duration-300 ${
                 activeTab === 'delivered'
-                  ? 'border-success text-success'
-                  : 'border-transparent text-gray-600 hover:text-text'
+                  ? 'bg-success text-white shadow-md'
+                  : 'text-text-light hover:bg-primary-50'
               }`}
             >
               المُسلمة ({deliveredOrders.length})

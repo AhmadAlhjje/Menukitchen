@@ -93,7 +93,7 @@ export default function InvoicePage() {
               {t('invoice.title')}
             </h1>
             <p className="text-gray-600">
-              {t('invoice.sessionNumber')}: #{sessionId}
+              {t('invoice.sessionNumber')}: {sessionId}
             </p>
             <p className="text-sm text-gray-500">
               {formatDate(new Date().toISOString(), language === 'ar' ? 'ar-SA' : 'en-US')} - {formatTime(new Date().toISOString(), language === 'ar' ? 'ar-SA' : 'en-US')}
@@ -106,7 +106,7 @@ export default function InvoicePage() {
               <div>
                 <p className="text-sm text-gray-600">{t('invoice.tableNumber')}:</p>
                 <p className="font-medium text-lg">
-                  {orders[0].session.table?.tableNumber || `${t('common.table')} #${orders[0].session.tableId}`}
+                  {orders[0].session.table?.tableNumber || `${t('common.table')} ${orders[0].session.tableId}`}
                 </p>
               </div>
               <div>

@@ -112,7 +112,7 @@ export const Invoice: React.FC<InvoiceProps> = ({ session, onClose }) => {
                   <div key={order.id} className="border border-gray-200 rounded-lg p-4">
                     <div className="flex justify-between items-center mb-3 pb-2 border-b">
                       <span className="font-semibold">
-                        طلب #{orderIndex + 1} - {order.orderNumber}
+                        طلب {orderIndex + 1} - {order.orderNumber}
                       </span>
                       <span className="text-sm text-gray-600">
                         {formatOrderTime(order.orderTime, language)}

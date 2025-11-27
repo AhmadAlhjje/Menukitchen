@@ -156,7 +156,7 @@ export default function SessionsPage() {
                       <div>
                         <p className="text-sm text-gray-600">الطاولة</p>
                         <p className="font-bold text-lg">
-                          #{session.table?.tableNumber || '-'}
+                          {session.table?.tableNumber || '-'}
                         </p>
                       </div>
                       <div>

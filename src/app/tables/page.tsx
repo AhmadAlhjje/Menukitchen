@@ -158,7 +158,7 @@ export default function TablesPage() {
                     <div className="flex justify-between items-start mb-3">
                       <div>
                         <h3 className="text-2xl font-bold text-text">
-                          طاولة #{table.tableNumber}
+                          طاولة {table.tableNumber}
                         </h3>
                         <p className="text-sm text-gray-500 mt-1">
                           {table.qrCode}

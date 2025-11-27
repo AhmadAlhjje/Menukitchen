@@ -13,8 +13,8 @@ export const Card: React.FC<CardProps> = ({
   onClick,
   hoverable = false,
 }) => {
-  const baseClasses = 'bg-surface rounded-lg shadow-md p-6';
-  const hoverClasses = hoverable ? 'hover:shadow-lg transition-shadow cursor-pointer' : '';
+  const baseClasses = 'bg-surface rounded-lg p-6 border border-border';
+  const hoverClasses = hoverable ? 'hover:shadow-md hover:border-primary/40 transition-all duration-200 cursor-pointer' : 'shadow-sm';
   const clickClasses = onClick ? 'cursor-pointer' : '';
 
   return (

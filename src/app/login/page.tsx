@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Input } from '@/components/atoms/Input';
 import { Button } from '@/components/atoms/Button';
+import { Icon } from '@/components/atoms/Icon';
 import { LanguageSwitcher } from '@/components/molecules/LanguageSwitcher';
 import { useAuth } from '@/hooks/useAuth';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -64,20 +65,23 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary to-secondary p-4">
-      <div className="absolute top-4 end-4">
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <div className="absolute top-6 end-6">
         <LanguageSwitcher />
       </div>
 
-      <div className="bg-surface rounded-lg shadow-2xl p-8 w-full max-w-md">
+      <div className="bg-surface rounded-lg shadow-md border border-border p-8 w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-primary mb-2">
+          <div className="w-14 h-14 bg-primary rounded-lg mx-auto mb-4 flex items-center justify-center">
+            <Icon name="restaurant" className="text-white" size={32} />
+          </div>
+          <h1 className="text-2xl font-bold text-text mb-2">
             {t('common.appName')}
           </h1>
-          <p className="text-gray-600">{t('auth.loginSubtitle')}</p>
+          <p className="text-text-light text-sm">{t('auth.loginSubtitle')}</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <Input
             type="email"
             label={t('common.email')}
@@ -107,9 +111,11 @@ export default function LoginPage() {
           </Button>
         </form>
 
-        <div className="mt-6 text-center text-sm text-gray-600">
-          <p>{t('auth.loginSubtitle')}</p>
-          <p className="mt-2">kitchen@restaurant.com / admin123</p>
+        <div className="mt-6 text-center">
+          <div className="bg-primary-50 rounded-lg p-3 border border-primary-100">
+            <p className="text-xs text-text-light font-medium mb-1">{t('auth.loginSubtitle')}</p>
+            <p className="text-xs font-mono text-text">kitchen@restaurant.com / admin123</p>
+          </div>
         </div>
       </div>
     </div>

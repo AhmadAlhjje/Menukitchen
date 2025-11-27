@@ -18,20 +18,20 @@ export const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const baseClasses =
-    'font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2';
+    'font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-offset-2';
 
   const variantClasses = {
-    primary: 'bg-primary text-white hover:bg-opacity-90',
-    secondary: 'bg-secondary text-white hover:bg-opacity-90',
-    success: 'bg-success text-white hover:bg-opacity-90',
-    error: 'bg-error text-white hover:bg-opacity-90',
-    outline: 'border-2 border-primary text-primary hover:bg-primary hover:text-white',
+    primary: 'bg-primary text-white hover:bg-primary-dark active:bg-primary-dark focus:ring-primary/50',
+    secondary: 'bg-secondary text-white hover:bg-secondary-dark active:bg-secondary-dark focus:ring-secondary/50',
+    success: 'bg-success text-white hover:bg-success-dark active:bg-success-dark focus:ring-success/50',
+    error: 'bg-error text-white hover:bg-error-dark active:bg-error-dark focus:ring-error/50',
+    outline: 'border-2 border-border text-text hover:border-primary hover:text-primary hover:bg-primary-50 active:bg-primary-100 focus:ring-primary/50',
   };
 
   const sizeClasses = {
-    sm: 'px-3 py-1.5 text-sm',
-    md: 'px-4 py-2 text-base',
-    lg: 'px-6 py-3 text-lg',
+    sm: 'px-4 py-2 text-sm',
+    md: 'px-6 py-2.5 text-base',
+    lg: 'px-8 py-3 text-base',
   };
 
   const widthClass = fullWidth ? 'w-full' : '';

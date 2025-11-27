@@ -26,12 +26,12 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onMarkAsReady, load
 
   return (
     <Card hoverable className="relative">
-      <div className="flex justify-between items-start mb-3">
+      <div className="flex justify-between items-start mb-4">
         <div>
-          <h3 className="text-lg font-bold text-text">
-            {t('orders.orderNumber')} #{order.id}
+          <h3 className="text-xl font-bold text-text">
+            {t('orders.orderNumber')} {order.id}
           </h3>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-text-muted mt-1">
             {getRelativeTime(order.createdAt, language)}
           </p>
         </div>
@@ -40,31 +40,31 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onMarkAsReady, load
         </Badge>
       </div>
 
-      <div className="space-y-2 mb-4">
+      <div className="space-y-3 mb-4 bg-primary-50 rounded-xl p-4">
         <div className="flex justify-between text-sm">
-          <span className="text-gray-600">{t('orders.tableNumber')}:</span>
-          <span className="font-medium">
-            {order.table?.tableNumber || order.session?.table?.tableNumber || t('common.table') + ' #' + (order.tableId || order.session?.tableId)}
+          <span className="text-text-light font-medium">{t('orders.tableNumber')}:</span>
+          <span className="font-bold text-text">
+            {order.table?.tableNumber || order.session?.table?.tableNumber || t('common.table') + ' ' + (order.tableId || order.session?.tableId)}
           </span>
         </div>
         <div className="flex justify-between text-sm">
-          <span className="text-gray-600">{t('orders.orderTime')}:</span>
-          <span className="font-medium">{formatOrderTime(order.orderTime || order.createdAt, language)}</span>
+          <span className="text-text-light font-medium">{t('orders.orderTime')}:</span>
+          <span className="font-bold text-text">{formatOrderTime(order.orderTime || order.createdAt, language)}</span>
         </div>
         <div className="flex justify-between text-sm">
-          <span className="text-gray-600">{t('orders.itemsCount')}:</span>
-          <span className="font-medium">{order.items?.length || 0}</span>
+          <span className="text-text-light font-medium">{t('orders.itemsCount')}:</span>
+          <span className="font-bold text-text">{order.items?.length || 0}</span>
         </div>
-        <div className="flex justify-between text-sm font-bold">
-          <span className="text-gray-600">{t('common.total')}:</span>
-          <span className="text-primary">{formatCurrency(order.totalAmount, language === 'ar' ? 'ar-SA' : 'en-US')}</span>
+        <div className="flex justify-between text-base pt-2 border-t border-primary-100">
+          <span className="text-text-light font-semibold">{t('common.total')}:</span>
+          <span className="font-bold text-primary text-lg">{formatCurrency(order.totalAmount, language === 'ar' ? 'ar-SA' : 'en-US')}</span>
         </div>
       </div>
 
       {order.notes && (
-        <div className="mb-4 p-2 bg-gray-50 rounded">
-          <p className="text-xs text-gray-600 mb-1">{t('orders.customerNotes')}:</p>
-          <p className="text-sm text-text">{order.notes}</p>
+        <div className="mb-4 p-3 bg-warning-light/10 rounded-xl border border-warning/20">
+          <p className="text-xs text-text-light font-semibold mb-1">{t('orders.customerNotes')}:</p>
+          <p className="text-sm text-text font-medium">{order.notes}</p>
         </div>
       )}
 
