@@ -32,6 +32,11 @@ const authSlice = createSlice({
       if (typeof window !== 'undefined') {
         localStorage.setItem('kitchen_token', action.payload.token);
         setCookie('kitchen_token', action.payload.token, 7); // 7 days expiry
+
+        // Store restaurantId for Socket.IO
+        if (action.payload.user.restaurantId) {
+          localStorage.setItem('restaurantId', action.payload.user.restaurantId.toString());
+        }
       }
     },
     setLoading: (state, action: PayloadAction<boolean>) => {
@@ -45,6 +50,7 @@ const authSlice = createSlice({
       // Remove token from both cookies and localStorage
       if (typeof window !== 'undefined') {
         localStorage.removeItem('kitchen_token');
+        localStorage.removeItem('restaurantId');
         deleteCookie('kitchen_token');
       }
     },

@@ -8,11 +8,13 @@ import {
   setDeliveredOrders,
   setLoading,
   setError,
+  addNewOrder,
   updateOrderStatus,
 } from '@/lib/redux/slices/ordersSlice';
 import axiosInstance from '@/lib/axios';
 import { Order, OrderStatus } from '@/types';
 import toast from 'react-hot-toast';
+import { initializeSocket } from '@/lib/socket';
 
 export const useOrders = (autoFetch: boolean = true) => {
   const dispatch = useAppDispatch();
@@ -192,7 +194,7 @@ export const useOrders = (autoFetch: boolean = true) => {
     []
   );
 
-  // Auto-refresh orders on mount only
+  // Auto-refresh orders on mount only + Socket.IO setup
   useEffect(() => {
     console.log('[useOrders] useEffect triggered. autoFetch:', autoFetch);
     if (!autoFetch) {
@@ -221,15 +223,41 @@ export const useOrders = (autoFetch: boolean = true) => {
 
     doFetch();
 
-    // Set up periodic refresh every 30 seconds
-    const interval = setInterval(() => {
-      console.log('[useOrders] Auto-refresh interval triggered');
-      doFetch();
-    }, 30000); // 30 seconds
+    // Initialize Socket.IO
+    const restaurantId = typeof window !== 'undefined' ? localStorage.getItem('restaurantId') : null;
+    console.log('[useOrders] RestaurantId from localStorage:', restaurantId);
+
+    if (restaurantId) {
+      const socket = initializeSocket(Number(restaurantId));
+
+      // Listen for new orders
+      socket.on('new-order', (data: { order: Order; restaurantId: number }) => {
+        console.log('[useOrders] 📦 New order received via socket!');
+        console.log('[useOrders] Order Number:', data.order?.orderNumber);
+        console.log('[useOrders] Order restaurantId:', data.restaurantId);
+        console.log('[useOrders] My restaurantId:', restaurantId);
+
+        if (data.restaurantId === Number(restaurantId)) {
+          console.log('[useOrders] ✅ Restaurant ID matches, adding order');
+          dispatch(addNewOrder(data.order));
+          toast.success(`طلب جديد: ${data.order.orderNumber}`);
+        } else {
+          console.log('[useOrders] ❌ Restaurant ID does not match');
+        }
+      });
+
+      // Listen for order status updates
+      socket.on('order-status-updated', (data: { order: Order; restaurantId: number }) => {
+        console.log('[useOrders] Order status updated via socket:', data.order.orderNumber);
+        if (data.restaurantId === Number(restaurantId)) {
+          // Refresh all orders to get the latest state
+          doFetch();
+        }
+      });
+    }
 
     return () => {
-      console.log('[useOrders] Cleanup: clearing interval');
-      clearInterval(interval);
+      console.log('[useOrders] Cleanup');
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoFetch]); // Only depend on autoFetch, not on the fetch functions

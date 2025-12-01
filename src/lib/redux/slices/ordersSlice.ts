@@ -36,6 +36,10 @@ const ordersSlice = createSlice({
     setError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload;
     },
+    addNewOrder: (state, action: PayloadAction<Order>) => {
+      // Add new order to the beginning of the list
+      state.newOrders.unshift(action.payload);
+    },
     updateOrderStatus: (state, action: PayloadAction<{ orderId: number; status: 'preparing' | 'delivered' }>) => {
       // Move order based on status
       const orderIndex = state.newOrders.findIndex(o => o.id === action.payload.orderId);
@@ -65,6 +69,7 @@ export const {
   setDeliveredOrders,
   setLoading,
   setError,
+  addNewOrder,
   updateOrderStatus,
   clearOrders,
 } = ordersSlice.actions;

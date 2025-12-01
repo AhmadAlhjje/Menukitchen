@@ -48,14 +48,27 @@ export const useAuth = () => {
           console.log('[useAuth] Verifying token...');
           // Verify token and get user info
           const response = await axiosInstance.get("/api/auth/me");
-          const userData: User = response.data.user || response.data;
+          console.log('[useAuth] Full response:', response.data);
 
+          const userData: User = response.data.user || response.data.data || response.data;
+          console.log('[useAuth] User data:', userData);
           console.log('[useAuth] Token valid, user:', userData.username);
+          console.log('[useAuth] Restaurant ID:', userData.restaurantId);
+
           dispatch(setCredentials({ user: userData, token }));
+
+          // Save restaurantId to localStorage for Socket.IO
+          if (userData.restaurantId) {
+            console.log('[useAuth] Saving restaurantId to localStorage:', userData.restaurantId);
+            localStorage.setItem('restaurantId', userData.restaurantId.toString());
+          } else {
+            console.warn('[useAuth] No restaurantId found in user data!');
+          }
         } catch (error: any) {
           console.error('[useAuth] Token invalid:', error);
           // Token is invalid, remove it from both places
           localStorage.removeItem("kitchen_token");
+          localStorage.removeItem("restaurantId");
 
           // Dispatch logout to clear Redux state
           dispatch(logoutAction());
@@ -83,6 +96,12 @@ export const useAuth = () => {
       const { token, user } = response.data.data || response.data;
 
       dispatch(setCredentials({ user, token }));
+
+      // Save restaurantId to localStorage for Socket.IO
+      if (user.restaurantId) {
+        localStorage.setItem('restaurantId', user.restaurantId.toString());
+      }
+
       toast.success("تم تسجيل الدخول بنجاح");
     } catch (error: any) {
       const errorMessage =
