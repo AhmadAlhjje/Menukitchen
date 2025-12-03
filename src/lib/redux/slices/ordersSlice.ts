@@ -37,8 +37,14 @@ const ordersSlice = createSlice({
       state.error = action.payload;
     },
     addNewOrder: (state, action: PayloadAction<Order>) => {
-      // Add new order to the beginning of the list
-      state.newOrders.unshift(action.payload);
+      // Check if order already exists to prevent duplicates
+      const orderExists = state.newOrders.some(order => order.id === action.payload.id);
+      if (!orderExists) {
+        // Add new order to the beginning of the list
+        state.newOrders.unshift(action.payload);
+      } else {
+        console.log('[ordersSlice] Order already exists, skipping:', action.payload.id);
+      }
     },
     updateOrderStatus: (state, action: PayloadAction<{ orderId: number; status: 'preparing' | 'delivered' }>) => {
       // Move order based on status

@@ -110,13 +110,6 @@ export default function LoginPage() {
             {loading ? t('auth.loggingIn') : t('auth.loginButton')}
           </Button>
         </form>
-
-        <div className="mt-6 text-center">
-          <div className="bg-primary-50 rounded-lg p-3 border border-primary-100">
-            <p className="text-xs text-text-light font-medium mb-1">{t('auth.loginSubtitle')}</p>
-            <p className="text-xs font-mono text-text">kitchen@restaurant.com / admin123</p>
-          </div>
-        </div>
       </div>
     </div>
   );

@@ -20,6 +20,7 @@ export const useOrders = (autoFetch: boolean = true) => {
   const dispatch = useAppDispatch();
   const { newOrders, preparingOrders, deliveredOrders, loading, error } = useAppSelector((state) => state.orders);
   const hasFetchedOnMount = useRef(false);
+  const socketListenersSetup = useRef(false);
 
   // Fetch new orders
   const fetchNewOrders = useCallback(async () => {
@@ -194,9 +195,9 @@ export const useOrders = (autoFetch: boolean = true) => {
     []
   );
 
-  // Auto-refresh orders on mount only + Socket.IO setup
+  // Initial fetch on mount
   useEffect(() => {
-    console.log('[useOrders] useEffect triggered. autoFetch:', autoFetch);
+    console.log('[useOrders] Initial fetch useEffect triggered. autoFetch:', autoFetch);
     if (!autoFetch) {
       console.log('[useOrders] autoFetch is false, skipping auto-fetch');
       return;
@@ -222,45 +223,86 @@ export const useOrders = (autoFetch: boolean = true) => {
     };
 
     doFetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoFetch]);
 
-    // Initialize Socket.IO
+  // Socket.IO setup - separate effect
+  useEffect(() => {
+    console.log('[useOrders] Socket setup useEffect triggered');
+
+    if (!autoFetch) {
+      console.log('[useOrders] autoFetch is false, skipping socket setup');
+      return;
+    }
+
+    if (socketListenersSetup.current) {
+      console.log('[useOrders] Socket listeners already setup, skipping');
+      return;
+    }
+
     const restaurantId = typeof window !== 'undefined' ? localStorage.getItem('restaurantId') : null;
     console.log('[useOrders] RestaurantId from localStorage:', restaurantId);
 
-    if (restaurantId) {
-      const socket = initializeSocket(Number(restaurantId));
-
-      // Listen for new orders
-      socket.on('new-order', (data: { order: Order; restaurantId: number }) => {
-        console.log('[useOrders] 📦 New order received via socket!');
-        console.log('[useOrders] Order Number:', data.order?.orderNumber);
-        console.log('[useOrders] Order restaurantId:', data.restaurantId);
-        console.log('[useOrders] My restaurantId:', restaurantId);
-
-        if (data.restaurantId === Number(restaurantId)) {
-          console.log('[useOrders] ✅ Restaurant ID matches, adding order');
-          dispatch(addNewOrder(data.order));
-          toast.success(`طلب جديد: ${data.order.orderNumber}`);
-        } else {
-          console.log('[useOrders] ❌ Restaurant ID does not match');
-        }
-      });
-
-      // Listen for order status updates
-      socket.on('order-status-updated', (data: { order: Order; restaurantId: number }) => {
-        console.log('[useOrders] Order status updated via socket:', data.order.orderNumber);
-        if (data.restaurantId === Number(restaurantId)) {
-          // Refresh all orders to get the latest state
-          doFetch();
-        }
-      });
+    if (!restaurantId) {
+      console.log('[useOrders] No restaurantId found, skipping socket setup');
+      return;
     }
 
+    console.log('[useOrders] Setting up socket listeners');
+    socketListenersSetup.current = true;
+
+    const socket = initializeSocket(Number(restaurantId));
+
+    // Helper function for refetch
+    const doFetch = async () => {
+      try {
+        await Promise.all([fetchNewOrders(), fetchDeliveredOrders()]);
+      } catch (error) {
+        console.error('[useOrders] Error fetching orders:', error);
+      }
+    };
+
+    // Define event handlers
+    const handleNewOrder = (data: { order: Order; restaurantId: number }) => {
+      console.log('[useOrders] 📦 New order received via socket!');
+      console.log('[useOrders] Order Number:', data.order?.orderNumber);
+      console.log('[useOrders] Order restaurantId:', data.restaurantId);
+      console.log('[useOrders] My restaurantId:', restaurantId);
+
+      if (data.restaurantId === Number(restaurantId)) {
+        console.log('[useOrders] ✅ Restaurant ID matches, adding order');
+        dispatch(addNewOrder(data.order));
+        toast.success(`طلب جديد: ${data.order.orderNumber}`);
+      } else {
+        console.log('[useOrders] ❌ Restaurant ID does not match');
+      }
+    };
+
+    const handleOrderStatusUpdate = (data: { order: Order; restaurantId: number }) => {
+      console.log('[useOrders] Order status updated via socket:', data.order.orderNumber);
+      if (data.restaurantId === Number(restaurantId)) {
+        // Refresh all orders to get the latest state
+        doFetch();
+      }
+    };
+
+    // Listen for new orders
+    socket.on('new-order', handleNewOrder);
+
+    // Listen for order status updates
+    socket.on('order-status-updated', handleOrderStatusUpdate);
+
+    console.log('[useOrders] Socket listeners registered successfully');
+
+    // Cleanup function to remove event listeners
     return () => {
-      console.log('[useOrders] Cleanup');
+      console.log('[useOrders] Cleanup - removing socket listeners');
+      socket.off('new-order', handleNewOrder);
+      socket.off('order-status-updated', handleOrderStatusUpdate);
+      socketListenersSetup.current = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autoFetch]); // Only depend on autoFetch, not on the fetch functions
+  }, [autoFetch, dispatch]); // Include dispatch to prevent stale closures
 
   return {
     newOrders,
