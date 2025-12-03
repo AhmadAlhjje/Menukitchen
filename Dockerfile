@@ -33,7 +33,7 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
 # نسخ الملفات الضرورية من builder
-COPY --from=builder /app/public ./public
+RUN [ -d /app/public ] && cp -r /app/public ./public || echo "No public folder, skipping"
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 
