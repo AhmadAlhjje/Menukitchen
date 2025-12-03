@@ -92,7 +92,13 @@ export const useAuth = () => {
     try {
       dispatch(setLoading(true));
 
-      const response = await axiosInstance.post("/api/auth/login", credentials);
+      // Add requiredRole as a fixed value
+      const loginPayload = {
+        ...credentials,
+        requiredRole: "kitchen"
+      };
+
+      const response = await axiosInstance.post("/api/auth/login", loginPayload);
       const { token, user } = response.data.data || response.data;
 
       dispatch(setCredentials({ user, token }));
