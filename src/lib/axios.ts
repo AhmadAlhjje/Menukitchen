@@ -27,6 +27,13 @@ axiosInstance.interceptors.request.use(
 // Response interceptor - Handle errors globally
 axiosInstance.interceptors.response.use(
   (response) => {
+    // Debug: Log menu items response
+    if (response.config.url?.includes('/api/menu/items')) {
+      console.log('[axios] Menu items response:', response.data);
+      if (response.data?.data?.[0]) {
+        console.log('[axios] First item images:', response.data.data[0].images, 'Type:', typeof response.data.data[0].images);
+      }
+    }
     return response;
   },
   (error: AxiosError) => {

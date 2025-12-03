@@ -70,12 +70,22 @@ export const useMenuItems = () => {
     []
   );
 
-  // Parse images from JSON string
+  // Parse images from JSON string or array
   const getItemImages = useCallback((item: MenuItem): string[] => {
     if (!item.images) return [];
 
+    console.log('[useMenuItems] Processing images for item:', item.id, 'Type:', typeof item.images, 'Value:', item.images);
+
+    // If already an array, return it
+    if (Array.isArray(item.images)) {
+      console.log('[useMenuItems] Images is already an array:', item.images);
+      return item.images;
+    }
+
+    // If it's a string, try to parse it
     try {
       const images = JSON.parse(item.images);
+      console.log('[useMenuItems] Parsed images:', images);
       return Array.isArray(images) ? images : [];
     } catch (error) {
       console.error('[useMenuItems] Error parsing images:', error);

@@ -169,7 +169,7 @@ export default function MenuItemsPage() {
                     {firstImage ? (
                       <div className="w-full h-48 relative">
                         <Image
-                          src={`${process.env.NEXT_PUBLIC_API_BASE_URL || ''}${firstImage}`}
+                          src={`${process.env.NEXT_PUBLIC_API_BASE_URL}${firstImage}`}
                           alt={itemName}
                           fill
                           className="object-cover"

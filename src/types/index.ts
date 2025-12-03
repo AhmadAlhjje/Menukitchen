@@ -35,7 +35,7 @@ export interface MenuItem {
   nameAr: string;
   description?: string;
   price: string | number;
-  images?: string; // JSON string of image array
+  images?: string[] | string; // Array of image paths or JSON string
   preparationTime: number;
   isAvailable: boolean;
   displayOrder: number;
