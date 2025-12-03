@@ -19,6 +19,10 @@ COPY . .
 # تعطيل telemetry أثناء البناء
 ENV NEXT_TELEMETRY_DISABLED 1
 
+# تعيين عنوان API أثناء البناء
+ARG NEXT_PUBLIC_API_BASE_URL
+ENV NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
+
 # بناء التطبيق
 RUN npm run build
 
