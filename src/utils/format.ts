@@ -1,12 +1,12 @@
 /**
- * Format currency amount in SAR
+ * Format currency amount in SYP
  */
 export const formatCurrency = (amount: number, locale: string = 'ar-SA'): string => {
   return new Intl.NumberFormat(locale, {
     style: 'currency',
-    currency: 'SAR',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    currency: 'SYP',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
   }).format(amount);
 };
 

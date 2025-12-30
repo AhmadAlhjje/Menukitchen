@@ -205,7 +205,7 @@ export default function MenuItemsPage() {
 
                       <div className="flex items-center justify-between mb-3">
                         <span className="text-xl font-bold text-primary">
-                          {price.toFixed(2)} ل.س
+                          {Math.round(price)} ل.س
                         </span>
                         <span className="text-sm text-gray-500">
                           ⏱️ {item.preparationTime} دقيقة

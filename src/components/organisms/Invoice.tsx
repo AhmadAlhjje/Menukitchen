@@ -185,8 +185,8 @@ export const Invoice: React.FC<InvoiceProps> = ({ session, onClose }) => {
                                   )}
                                 </td>
                                 <td className="text-center py-2 px-1">{item.quantity}</td>
-                                <td className="text-right py-2 px-1">{unitPrice.toFixed(2)}</td>
-                                <td className="text-right py-2 px-1 font-semibold">{subtotal.toFixed(2)}</td>
+                                <td className="text-right py-2 px-1">{Math.round(unitPrice)}</td>
+                                <td className="text-right py-2 px-1 font-semibold">{Math.round(subtotal)}</td>
                               </tr>
                             );
                           })}
@@ -197,7 +197,7 @@ export const Invoice: React.FC<InvoiceProps> = ({ session, onClose }) => {
                       <div className="flex justify-end text-sm">
                         <div className="text-right">
                           <span className="text-gray-600 ml-4">مجموع الطلب:</span>
-                          <span className="font-bold ml-2">{orderTotal.toFixed(2)} ل.س</span>
+                          <span className="font-bold ml-2">{Math.round(orderTotal)} ل.س</span>
                         </div>
                       </div>
                     </div>
@@ -213,7 +213,7 @@ export const Invoice: React.FC<InvoiceProps> = ({ session, onClose }) => {
           <div className="border-t-2 border-gray-300 pt-4">
             <div className="flex justify-between items-center text-xl font-bold">
               <span>المجموع الإجمالي / Grand Total</span>
-              <span className="text-2xl text-primary">{totalAmount.toFixed(2)} ل.س</span>
+              <span className="text-2xl text-primary">{Math.round(totalAmount)} ل.س</span>
             </div>
           </div>
 
