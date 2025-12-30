@@ -140,31 +140,56 @@ export default function InvoicePage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {orders.map((order) => {
-                      const orderItems = (order as any).orderItems || order.items || [];
-                      return orderItems.map((item: any) => {
+                    {(() => {
+                      // Collect all items from all orders
+                      const allItems: any[] = [];
+                      orders.forEach((order) => {
+                        const orderItems = (order as any).orderItems || order.items || [];
+                        allItems.push(...orderItems);
+                      });
+
+                      // Group items by itemId and price
+                      const groupedItems = allItems.reduce((acc: any, item: any) => {
+                        const itemId = item.itemId || item.item?.id;
+                        const price = parseFloat(item.unitPrice) || parseFloat(item.price) || 0;
+                        const key = `${itemId}_${price}`;
+
+                        if (!acc[key]) {
+                          acc[key] = {
+                            ...item,
+                            quantity: 0,
+                            subtotal: 0
+                          };
+                        }
+
+                        acc[key].quantity += item.quantity || 0;
+                        acc[key].subtotal += parseFloat(item.subtotal) || (price * (item.quantity || 0));
+
+                        return acc;
+                      }, {});
+
+                      // Convert to array and render
+                      return Object.values(groupedItems).map((item: any, index: number) => {
                         const itemName = language === 'ar'
                           ? (item.item?.nameAr || item.item?.name || '-')
                           : (item.item?.name || '-');
 
                         const price = parseFloat(item.unitPrice) || parseFloat(item.price) || 0;
-                        const quantity = item.quantity || 0;
-                        const subtotal = parseFloat(item.subtotal) || (price * quantity);
 
                         return (
-                          <tr key={item.id} className="border-b border-gray-200">
+                          <tr key={`${item.itemId}_${index}`} className="border-b border-gray-200">
                             <td className="py-3">{itemName}</td>
-                            <td className="text-center py-3">{quantity}</td>
+                            <td className="text-center py-3">{item.quantity}</td>
                             <td className="text-end py-3">
                               {formatCurrency(price, language === 'ar' ? 'ar-SA' : 'en-US')}
                             </td>
                             <td className="text-end py-3">
-                              {formatCurrency(subtotal, language === 'ar' ? 'ar-SA' : 'en-US')}
+                              {formatCurrency(item.subtotal, language === 'ar' ? 'ar-SA' : 'en-US')}
                             </td>
                           </tr>
                         );
                       });
-                    })}
+                    })()}
                   </tbody>
                 </table>
               </div>

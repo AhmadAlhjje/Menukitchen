@@ -171,17 +171,6 @@ export default function OrderDetailsPage() {
             </Button>
           </div>
         )}
-
-        {order.status === 'delivered' && (
-          <Button
-            variant="primary"
-            size="lg"
-            onClick={() => router.push(`/sessions/${order.sessionId}/invoice`)}
-            fullWidth
-          >
-            {t('sessions.viewInvoice')}
-          </Button>
-        )}
       </main>
     </div>
   );
