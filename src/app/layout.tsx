@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Toaster } from 'react-hot-toast';
 import { ReduxProvider } from '@/lib/redux/provider';
+import { OrderNotificationProvider } from '@/components/providers/OrderNotificationProvider';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -17,7 +18,9 @@ export default function RootLayout({
     <html lang="ar" dir="rtl">
       <body>
         <ReduxProvider>
-          {children}
+          <OrderNotificationProvider>
+            {children}
+          </OrderNotificationProvider>
           <Toaster
             position="top-center"
             reverseOrder={false}
