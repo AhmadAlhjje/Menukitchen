@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { LanguageSwitcher } from '../molecules/LanguageSwitcher';
 import { Button } from '../atoms/Button';
 import { Icon } from '../atoms/Icon';
@@ -11,9 +11,12 @@ import { useTranslation } from '@/hooks/useTranslation';
 
 export const Header: React.FC = () => {
   const pathname = usePathname();
+  const router = useRouter();
   const { user, logout } = useAuth();
   const { t, language } = useTranslation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
+  const [targetPath, setTargetPath] = useState<string | null>(null);
 
   const navItems = [
     { path: '/dashboard', label: t('navigation.dashboard'), icon: 'dashboard' },
@@ -25,8 +28,42 @@ export const Header: React.FC = () => {
 
   const isActive = (path: string) => pathname === path;
 
+  // Stop navigation loading when pathname changes
+  useEffect(() => {
+    setIsNavigating(false);
+    setTargetPath(null);
+  }, [pathname]);
+
+  const handleNavClick = (e: React.MouseEvent, path: string) => {
+    e.preventDefault();
+    setIsNavigating(true);
+    setTargetPath(path);
+    setIsSidebarOpen(false);
+    router.push(path);
+  };
+
   return (
     <>
+      {/* Loading Overlay */}
+      {isNavigating && (
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-[100] flex items-center justify-center">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 flex flex-col items-center gap-4">
+            <div className="relative w-16 h-16">
+              <div className="absolute inset-0 border-4 border-primary/20 rounded-full"></div>
+              <div className="absolute inset-0 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+            </div>
+            <p className="text-lg font-semibold text-text">
+              {language === 'ar' ? 'جاري التحميل...' : 'Loading...'}
+            </p>
+            {targetPath && (
+              <p className="text-sm text-text-light">
+                {navItems.find(item => item.path === targetPath)?.label}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Fixed Sidebar - Desktop (Always Visible) */}
       <aside
         className="hidden lg:flex lg:fixed lg:top-0 lg:right-0 lg:h-screen lg:w-72 lg:flex-col lg:bg-surface lg:shadow-2xl lg:z-40 lg:border-l lg:border-border"
@@ -48,14 +85,20 @@ export const Header: React.FC = () => {
             <Link
               key={item.path}
               href={item.path}
+              onClick={(e) => handleNavClick(e, item.path)}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${
                 isActive(item.path)
                   ? 'bg-primary text-white'
                   : 'text-text hover:bg-primary-50'
-              }`}
+              } ${isNavigating && targetPath === item.path ? 'opacity-50 cursor-wait' : ''}`}
             >
               <Icon name={item.icon} size={20} className={isActive(item.path) ? 'text-white' : 'text-primary'} />
               <span className="font-medium">{item.label}</span>
+              {isNavigating && targetPath === item.path && (
+                <div className="ml-auto">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                </div>
+              )}
             </Link>
           ))}
         </nav>
@@ -174,15 +217,20 @@ export const Header: React.FC = () => {
             <Link
               key={item.path}
               href={item.path}
-              onClick={() => setIsSidebarOpen(false)}
+              onClick={(e) => handleNavClick(e, item.path)}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${
                 isActive(item.path)
                   ? 'bg-primary text-white'
                   : 'text-text hover:bg-primary-50'
-              }`}
+              } ${isNavigating && targetPath === item.path ? 'opacity-50 cursor-wait' : ''}`}
             >
               <Icon name={item.icon} size={20} className={isActive(item.path) ? 'text-white' : 'text-primary'} />
               <span className="font-medium">{item.label}</span>
+              {isNavigating && targetPath === item.path && (
+                <div className="ml-auto">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                </div>
+              )}
             </Link>
           ))}
         </nav>
