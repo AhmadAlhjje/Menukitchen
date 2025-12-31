@@ -1,6 +1,16 @@
 // Order Status - Three statuses are used in the system
 export type OrderStatus = 'new' | 'preparing' | 'delivered';
 
+// Restaurant Types
+export interface Restaurant {
+  id: number;
+  name: string;
+  address?: string;
+  phone?: string;
+  logo?: string;
+  logoUrl?: string;
+}
+
 // User & Auth Types
 export interface User {
   id: number;
@@ -8,6 +18,7 @@ export interface User {
   email: string;
   role: 'admin' | 'kitchen';
   restaurantId: number;
+  restaurant?: Restaurant;
 }
 
 export interface LoginRequest {

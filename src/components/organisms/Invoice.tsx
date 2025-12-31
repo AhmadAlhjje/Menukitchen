@@ -4,6 +4,7 @@ import React, { useRef } from 'react';
 import { Session } from '@/types';
 import { formatOrderTime } from '@/utils/format';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '../atoms/Button';
 
 interface InvoiceProps {
@@ -13,10 +14,12 @@ interface InvoiceProps {
 
 export const Invoice: React.FC<InvoiceProps> = ({ session, onClose }) => {
   const { t, language } = useTranslation();
+  const { user } = useAuth();
   const invoiceRef = useRef<HTMLDivElement>(null);
 
+  const restaurant = user?.restaurant;
+
   const handlePrint = () => {
-    // Wait a bit for styles to be applied
     setTimeout(() => {
       window.print();
     }, 100);
@@ -40,215 +43,243 @@ export const Invoice: React.FC<InvoiceProps> = ({ session, onClose }) => {
 
   const totalAmount = calculateTotalFromOrders();
 
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        {/* Print styles */}
-        <style jsx>{`
-          @media print {
-            * {
-              margin: 0;
-              padding: 0;
-              box-sizing: border-box;
-            }
-            body {
-              margin: 0;
-              padding: 0;
-            }
-            body * {
-              visibility: hidden;
-            }
-            .print-area, .print-area * {
-              visibility: visible;
-            }
-            .print-area {
-              position: relative;
-              width: 100%;
-              margin: 0;
-              padding: 0;
-            }
-            .no-print {
-              display: none !important;
-            }
-            @page {
-              size: A4;
-              margin: 10mm;
-            }
-            html, body {
-              width: 100%;
-              height: 100%;
-            }
-            table {
-              page-break-inside: avoid;
-              border-collapse: collapse;
-            }
-            tr {
-              page-break-inside: avoid;
-            }
-            .order-container {
-              page-break-inside: avoid;
-            }
-          }
-        `}</style>
+  // Component for invoice content to avoid duplication
+  const InvoiceContent = () => (
+    <div className="bg-white" style={{ padding: '32px' }}>
+      {/* Header */}
+      <div className="text-center" style={{ borderBottom: '4px solid black', paddingBottom: '24px', marginBottom: '24px' }}>
+        {/* Restaurant Name */}
+        <h1 style={{ fontSize: '36px', fontWeight: 'bold', color: 'black', marginBottom: '12px' }}>
+          {restaurant?.name || t('common.appName')}
+        </h1>
 
-        {/* Invoice Content */}
-        <div ref={invoiceRef} className="print-area bg-white">
-          {/* Header */}
-          <div className="text-center border-b-2 border-gray-300 p-6">
-            <h1 className="text-3xl font-bold text-primary mb-2">{t('common.appName')}</h1>
-            <h2 className="text-xl font-semibold text-gray-700 mb-1">فاتورة مبيعات</h2>
-            <p className="text-sm text-gray-500">Sales Invoice</p>
-            <p className="text-xs text-gray-500 mt-2">{session.sessionNumber}</p>
-          </div>
-
-          {/* Session Info */}
-          <div className="p-6 border-b border-gray-200">
-            <div className="grid grid-cols-2 gap-6 text-sm">
-              <div>
-                <p className="text-gray-500 text-xs uppercase">الطاولة / Table</p>
-                <p className="font-bold text-lg mt-1">{session.table?.tableNumber || '-'}</p>
-              </div>
-              <div>
-                <p className="text-gray-500 text-xs uppercase">عدد الضيوف / Guests</p>
-                <p className="font-bold text-lg mt-1">{session.numberOfGuests}</p>
-              </div>
-              <div>
-                <p className="text-gray-500 text-xs uppercase">وقت البدء / Start Time</p>
-                <p className="font-medium mt-1">{formatOrderTime(session.startTime, language)}</p>
-              </div>
-              <div>
-                <p className="text-gray-500 text-xs uppercase">وقت الإغلاق / End Time</p>
-                <p className="font-medium mt-1">{session.endTime ? formatOrderTime(session.endTime, language) : '-'}</p>
-              </div>
-              {session.table?.location && (
-                <div className="col-span-2">
-                  <p className="text-gray-500 text-xs uppercase">الموقع / Location</p>
-                  <p className="font-medium mt-1">{session.table.location}</p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Orders Table */}
-          <div className="p-6 border-b border-gray-200">
-            <h3 className="text-lg font-bold mb-4 text-gray-800">الطلبات / Orders</h3>
-
-            {session.orders && session.orders.length > 0 ? (
-              <div className="space-y-6">
-                {session.orders.map((order, orderIndex) => {
-                  const orderTotal = typeof order.totalAmount === 'string'
-                    ? parseFloat(order.totalAmount)
-                    : order.totalAmount;
-
-                  return (
-                    <div key={order.id} className="order-container">
-                      <div className="flex justify-between items-center mb-3 pb-2 border-b border-gray-200">
-                        <span className="font-semibold text-gray-800">
-                          طلب {orderIndex + 1} - {order.orderNumber}
-                        </span>
-                        <span className="text-sm text-gray-500">
-                          {formatOrderTime(order.orderTime, language)}
-                        </span>
-                      </div>
-
-                      {/* Order Items Table */}
-                      <table className="w-full text-sm mb-3">
-                        <thead>
-                          <tr className="border-b-2 border-gray-300">
-                            <th className="text-right py-2 px-1">الصنف / Item</th>
-                            <th className="text-center py-2 px-1 w-12">الكمية</th>
-                            <th className="text-right py-2 px-1 w-20">السعر</th>
-                            <th className="text-right py-2 px-1 w-20">المجموع</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {(order.orderItems || order.items || []).map((item: any) => {
-                            const unitPrice = typeof item.unitPrice === 'string'
-                              ? parseFloat(item.unitPrice)
-                              : item.unitPrice || 0;
-                            const subtotal = typeof item.subtotal === 'string'
-                              ? parseFloat(item.subtotal)
-                              : item.subtotal || 0;
-
-                            const itemName = language === 'ar'
-                              ? (item.item?.nameAr || item.item?.name || '-')
-                              : (item.item?.name || '-');
-
-                            return (
-                              <tr key={item.id} className="border-b border-gray-100">
-                                <td className="py-2 px-1">
-                                  <div className="font-medium">{itemName}</div>
-                                  {item.notes && (
-                                    <div className="text-xs text-gray-500 mt-0.5">
-                                      ({item.notes})
-                                    </div>
-                                  )}
-                                </td>
-                                <td className="text-center py-2 px-1">{item.quantity}</td>
-                                <td className="text-right py-2 px-1">{Math.round(unitPrice)}</td>
-                                <td className="text-right py-2 px-1 font-semibold">{Math.round(subtotal)}</td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-
-                      {/* Order Subtotal */}
-                      <div className="flex justify-end text-sm">
-                        <div className="text-right">
-                          <span className="text-gray-600 ml-4">مجموع الطلب:</span>
-                          <span className="font-bold ml-2">{Math.round(orderTotal)} ل.س</span>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <p className="text-center text-gray-500 py-4">لا توجد طلبات</p>
-            )}
-          </div>
-
-          {/* Total */}
-          <div className="border-t-2 border-gray-300 pt-4">
-            <div className="flex justify-between items-center text-xl font-bold">
-              <span>المجموع الإجمالي / Grand Total</span>
-              <span className="text-2xl text-primary">{Math.round(totalAmount)} ل.س</span>
-            </div>
-          </div>
-
-          {/* Notes */}
-          {session.notes && (
-            <div className="mt-6 bg-gray-50 p-4 rounded">
-              <p className="text-sm text-gray-600 mb-1">ملاحظات / Notes:</p>
-              <p className="text-gray-800">{session.notes}</p>
-            </div>
+        {/* Restaurant Info */}
+        <div style={{ fontSize: '14px', color: 'black' }}>
+          {restaurant?.address && (
+            <p style={{ fontWeight: '500', marginBottom: '4px' }}>{restaurant.address}</p>
           )}
-
-          {/* Closed By */}
-          {session.closedByUser && (
-            <div className="mt-4 text-sm text-gray-600 text-center">
-              <p>تم الإغلاق بواسطة: {session.closedByUser.username}</p>
-            </div>
+          {restaurant?.phone && (
+            <p style={{ fontWeight: '500' }}>{restaurant.phone}</p>
           )}
-
-          {/* Footer */}
-          <div className="mt-8 pt-6 border-t text-center text-sm text-gray-500">
-            <p className="mb-2">شكراً لزيارتكم / Thank you for your visit</p>
-            <p>تم الطباعة: {new Date().toLocaleString('ar-SA')}</p>
-          </div>
         </div>
 
-        {/* Action Buttons (not printed) */}
-        <div className="no-print flex gap-3 p-6 border-t bg-gray-50 sticky bottom-0">
-          <Button variant="primary" onClick={handlePrint} fullWidth>
-            🖨️ طباعة الفاتورة
-          </Button>
-          <Button variant="secondary" onClick={onClose} fullWidth>
-            إغلاق
-          </Button>
+        <div style={{ marginTop: '24px' }}>
+          <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: 'black', marginBottom: '4px' }}>فاتورة مبيعات</h2>
+          <p style={{ fontSize: '18px', fontWeight: '600', color: 'black' }}>Sales Invoice</p>
+          <p style={{ fontSize: '14px', color: 'black', marginTop: '12px', fontWeight: '500' }}>رقم الفاتورة: {session.sessionNumber}</p>
         </div>
       </div>
+
+      {/* Session Info */}
+      <div style={{ borderBottom: '2px solid black', paddingBottom: '20px', marginBottom: '20px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', fontSize: '14px' }}>
+          <div style={{ borderRight: '2px solid black', paddingRight: '16px' }}>
+            <p style={{ color: 'black', fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '4px' }}>الطاولة / Table</p>
+            <p style={{ fontWeight: 'bold', fontSize: '20px', color: 'black' }}>{session.table?.tableNumber || '-'}</p>
+          </div>
+          <div style={{ paddingLeft: '16px' }}>
+            <p style={{ color: 'black', fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '4px' }}>عدد الضيوف / Guests</p>
+            <p style={{ fontWeight: 'bold', fontSize: '20px', color: 'black' }}>{session.numberOfGuests}</p>
+          </div>
+          <div style={{ borderRight: '2px solid black', paddingRight: '16px', paddingTop: '8px' }}>
+            <p style={{ color: 'black', fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '4px' }}>وقت البدء / Start Time</p>
+            <p style={{ fontWeight: '600', color: 'black' }}>{formatOrderTime(session.startTime, language)}</p>
+          </div>
+          <div style={{ paddingLeft: '16px', paddingTop: '8px' }}>
+            <p style={{ color: 'black', fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '4px' }}>وقت الإغلاق / End Time</p>
+            <p style={{ fontWeight: '600', color: 'black' }}>{session.endTime ? formatOrderTime(session.endTime, language) : '-'}</p>
+          </div>
+          {session.table?.location && (
+            <div style={{ gridColumn: 'span 2', paddingTop: '8px', borderTop: '1px solid #d1d5db' }}>
+              <p style={{ color: 'black', fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '4px' }}>الموقع / Location</p>
+              <p style={{ fontWeight: '600', color: 'black' }}>{session.table.location}</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Orders Table */}
+      <div style={{ paddingBottom: '20px', marginBottom: '20px' }}>
+        <h3 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '16px', color: 'black', borderBottom: '2px solid black', paddingBottom: '8px' }}>
+          الطلبات / Orders
+        </h3>
+
+        {session.orders && session.orders.length > 0 ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            {session.orders.map((order, orderIndex) => {
+              const orderTotal = typeof order.totalAmount === 'string'
+                ? parseFloat(order.totalAmount)
+                : order.totalAmount;
+
+              return (
+                <div key={order.id} style={{ border: '1px solid black', borderRadius: '4px', padding: '12px', pageBreakInside: 'avoid' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', paddingBottom: '8px', borderBottom: '1px solid black' }}>
+                    <span style={{ fontWeight: 'bold', color: 'black' }}>
+                      طلب رقم {orderIndex + 1} - {order.orderNumber}
+                    </span>
+                    <span style={{ fontSize: '14px', fontWeight: '600', color: 'black' }}>
+                      {formatOrderTime(order.orderTime, language)}
+                    </span>
+                  </div>
+
+                  {/* Order Items Table */}
+                  <table style={{ width: '100%', fontSize: '14px', marginBottom: '12px', borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr style={{ backgroundColor: 'black', color: 'white' }}>
+                        <th style={{ textAlign: 'right', padding: '8px', fontWeight: 'bold' }}>الصنف / Item</th>
+                        <th style={{ textAlign: 'center', padding: '8px', width: '64px', fontWeight: 'bold' }}>الكمية</th>
+                        <th style={{ textAlign: 'right', padding: '8px', width: '96px', fontWeight: 'bold' }}>السعر</th>
+                        <th style={{ textAlign: 'right', padding: '8px', width: '96px', fontWeight: 'bold' }}>المجموع</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(order.orderItems || order.items || []).map((item: any, idx: number) => {
+                        const unitPrice = typeof item.unitPrice === 'string'
+                          ? parseFloat(item.unitPrice)
+                          : item.unitPrice || 0;
+                        const subtotal = typeof item.subtotal === 'string'
+                          ? parseFloat(item.subtotal)
+                          : item.subtotal || 0;
+
+                        const itemName = language === 'ar'
+                          ? (item.item?.nameAr || item.item?.name || '-')
+                          : (item.item?.name || '-');
+
+                        return (
+                          <tr 
+                            key={item.id} 
+                            style={{ 
+                              borderBottom: '1px solid #d1d5db',
+                              backgroundColor: idx % 2 === 0 ? '#f9fafb' : 'white'
+                            }}
+                          >
+                            <td style={{ padding: '8px' }}>
+                              <div style={{ fontWeight: '600', color: 'black' }}>{itemName}</div>
+                              {item.notes && (
+                                <div style={{ fontSize: '12px', color: 'black', marginTop: '2px', fontStyle: 'italic' }}>
+                                  ({item.notes})
+                                </div>
+                              )}
+                            </td>
+                            <td style={{ textAlign: 'center', padding: '8px', fontWeight: '600', color: 'black' }}>{item.quantity}</td>
+                            <td style={{ textAlign: 'right', padding: '8px', color: 'black' }}>{Math.round(unitPrice)}</td>
+                            <td style={{ textAlign: 'right', padding: '8px', fontWeight: 'bold', color: 'black' }}>{Math.round(subtotal)}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+
+                  {/* Order Subtotal */}
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', fontSize: '14px', borderTop: '2px solid black', paddingTop: '8px' }}>
+                    <div style={{ textAlign: 'right' }}>
+                      <span style={{ color: 'black', fontWeight: 'bold', marginLeft: '16px' }}>مجموع الطلب:</span>
+                      <span style={{ fontWeight: 'bold', fontSize: '18px', marginLeft: '8px', color: 'black' }}>{Math.round(orderTotal)} ل.س</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <p style={{ textAlign: 'center', color: 'black', padding: '16px', fontWeight: '600', border: '1px solid black', borderRadius: '4px' }}>
+            لا توجد طلبات
+          </p>
+        )}
+      </div>
+
+      {/* Total */}
+      <div style={{ border: '4px solid black', backgroundColor: '#f3f4f6', padding: '16px', marginBottom: '20px', pageBreakInside: 'avoid' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{ fontSize: '20px', fontWeight: 'bold', color: 'black' }}>المجموع الإجمالي / Grand Total</span>
+          <span style={{ fontSize: '28px', fontWeight: 'bold', color: 'black' }}>{Math.round(totalAmount)} ل.س</span>
+        </div>
+      </div>
+
+      {/* Notes */}
+      {session.notes && (
+        <div style={{ marginBottom: '16px', border: '2px solid black', padding: '12px', borderRadius: '4px' }}>
+          <p style={{ fontSize: '14px', color: 'black', fontWeight: 'bold', marginBottom: '4px' }}>ملاحظات / Notes:</p>
+          <p style={{ color: 'black' }}>{session.notes}</p>
+        </div>
+      )}
+
+      {/* Closed By */}
+      {session.closedByUser && (
+        <div style={{ marginBottom: '16px', fontSize: '14px', color: 'black', textAlign: 'center', fontWeight: '600' }}>
+          <p>تم الإغلاق بواسطة: {session.closedByUser.username}</p>
+        </div>
+      )}
+
+      {/* Footer */}
+      <div style={{ paddingTop: '16px', borderTop: '2px solid black', textAlign: 'center', fontSize: '14px', color: 'black' }}>
+        <p style={{ marginBottom: '8px', fontWeight: 'bold', fontSize: '16px' }}>شكراً لزيارتكم / Thank you for your visit</p>
+        <p style={{ fontWeight: '600' }}>تاريخ الطباعة: {new Date().toLocaleString('ar-SA')}</p>
+      </div>
     </div>
+  );
+
+  return (
+    <>
+      {/* Print styles */}
+      <style jsx global>{`
+        @media print {
+          body * {
+            visibility: hidden;
+          }
+          
+          .print-only,
+          .print-only * {
+            visibility: visible !important;
+          }
+          
+          .print-only {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+          }
+          
+          .no-print {
+            display: none !important;
+          }
+
+          @page {
+            size: A4;
+            margin: 15mm;
+          }
+
+          body {
+            print-color-adjust: exact;
+            -webkit-print-color-adjust: exact;
+          }
+        }
+      `}</style>
+
+      {/* نسخة 1: للعرض على الشاشة فقط */}
+      <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 no-print">
+        <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+          {/* Invoice Content للعرض */}
+          <div ref={invoiceRef}>
+            <InvoiceContent />
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex gap-3 p-6 border-t bg-gray-50 sticky bottom-0">
+            <Button variant="primary" onClick={handlePrint} fullWidth>
+              🖨️ طباعة الفاتورة
+            </Button>
+            <Button variant="secondary" onClick={onClose} fullWidth>
+              إغلاق
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* نسخة 2: للطباعة فقط */}
+      <div className="print-only">
+        <InvoiceContent />
+      </div>
+    </>
   );
 };
