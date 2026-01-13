@@ -19,6 +19,12 @@ const nextConfig = {
         port: '4003',
         pathname: '/uploads/**',
       },
+      {
+        protocol: 'http',
+        hostname: '217.76.53.136',
+        port: '4003',
+        pathname: '/qr-codes/**',
+      },
     ],
     unoptimized: process.env.NODE_ENV === 'development',
   },
