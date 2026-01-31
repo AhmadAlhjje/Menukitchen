@@ -16,13 +16,13 @@ const nextConfig = {
       {
         protocol: 'http',
         hostname: '217.76.53.136',
-        port: '4003',
+        port: '7050',
         pathname: '/uploads/**',
       },
       {
         protocol: 'http',
         hostname: '217.76.53.136',
-        port: '4003',
+        port: '7050',
         pathname: '/qr-codes/**',
       },
     ],
