@@ -4,14 +4,14 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        - NEXT_PUBLIC_API_BASE_URL=http://217.76.53.136:3000
+        - NEXT_PUBLIC_API_BASE_URL=http://217.76.53.136:7050
     container_name: menukitchen-frontend
     restart: unless-stopped
     ports:
-      - "4001:4001"
+      - "7052:7052"
     environment:
       - NODE_ENV=production
-      - PORT=4001
+      - PORT=7052
     networks:
       - menukitchen-network
 
