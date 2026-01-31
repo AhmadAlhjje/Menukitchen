@@ -7,7 +7,7 @@ export const initializeSocket = (restaurantId: number): Socket => {
     return socket;
   }
 
-  const serverUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3003';
+  const serverUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:7050';
 
   socket = io(serverUrl, {
     transports: ['websocket', 'polling'],
